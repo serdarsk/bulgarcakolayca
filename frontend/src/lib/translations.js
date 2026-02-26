@@ -79,6 +79,18 @@ export const translations = {
         { title: "Online & Hibrit", desc: "Yüz yüze veya online katılım seçeneği" },
       ],
     },
+    // Flashcards Section
+    flashcards: {
+      sectionTitle: "Kelime Kartları",
+      sectionSubtitle: "Kartlara tıklayarak çevirisini görün",
+      bulgarian: "Bulgarca Kelimeler",
+      turkish: "Türkçe Kelimeler",
+      flipToSee: "Çevirmek için tıklayın",
+      pronunciation: "Okunuşu",
+      category: "Kategori",
+      showAll: "Tümünü Göster",
+      practiceMore: "Daha Fazla Pratik",
+    },
     // Pricing Table Section
     pricing: {
       sectionTitle: "Fiyat Karşılaştırması",

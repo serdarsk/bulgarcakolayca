@@ -477,6 +477,156 @@ const CoursesSection = () => {
   );
 };
 
+// Flashcards Section
+const FlashcardsSection = () => {
+  const { t, lang } = useLanguage();
+  const [activeLanguage, setActiveLanguage] = useState("bulgarian");
+  const [cards, setCards] = useState([]);
+  const [flippedCards, setFlippedCards] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCards(activeLanguage);
+  }, [activeLanguage]);
+
+  const fetchCards = async (language) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${API}/flashcards/${language}`);
+      setCards(response.data.cards.slice(0, 12)); // Show 12 cards
+      setFlippedCards({});
+    } catch (error) {
+      console.error("Error fetching flashcards:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleFlip = (id) => {
+    setFlippedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  return (
+    <section 
+      id="flashcards" 
+      data-testid="flashcards-section"
+      className="py-20 md:py-32 bg-[#F9F9F7]"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <p className="text-sm font-medium tracking-wide uppercase text-[#C41E3A] mb-4 body-sans">
+            {t("flashcards.sectionTitle")}
+          </p>
+          <h2 className="heading-serif text-3xl md:text-4xl lg:text-5xl font-bold text-[#1A201C] mb-4">
+            {t("flashcards.sectionTitle")}
+          </h2>
+          <p className="text-lg text-[#52525B] body-sans">
+            {t("flashcards.sectionSubtitle")}
+          </p>
+        </div>
+
+        {/* Language Tabs */}
+        <div className="flex justify-center gap-4 mb-12">
+          <button
+            onClick={() => setActiveLanguage("bulgarian")}
+            className={`px-6 py-3 rounded-full font-medium transition-all ${
+              activeLanguage === "bulgarian"
+                ? "bg-[#1B5E3C] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border border-[#E4E4E7] hover:border-[#1B5E3C]"
+            }`}
+            data-testid="flashcards-bulgarian-tab"
+          >
+            {t("flashcards.bulgarian")}
+          </button>
+          <button
+            onClick={() => setActiveLanguage("turkish")}
+            className={`px-6 py-3 rounded-full font-medium transition-all ${
+              activeLanguage === "turkish"
+                ? "bg-[#C41E3A] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border border-[#E4E4E7] hover:border-[#C41E3A]"
+            }`}
+            data-testid="flashcards-turkish-tab"
+          >
+            {t("flashcards.turkish")}
+          </button>
+        </div>
+
+        {/* Cards Grid */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B5E3C]"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {cards.map((card) => (
+              <div
+                key={card.id}
+                onClick={() => toggleFlip(card.id)}
+                className="cursor-pointer perspective-1000"
+                data-testid={`flashcard-${card.id}`}
+              >
+                <div
+                  className={`relative w-full h-40 transition-transform duration-500 transform-style-3d ${
+                    flippedCards[card.id] ? "rotate-y-180" : ""
+                  }`}
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: flippedCards[card.id] ? "rotateY(180deg)" : "rotateY(0deg)",
+                  }}
+                >
+                  {/* Front */}
+                  <div
+                    className={`absolute inset-0 rounded-xl p-4 flex flex-col items-center justify-center text-center backface-hidden ${
+                      activeLanguage === "bulgarian"
+                        ? "bg-[#1B5E3C] text-white"
+                        : "bg-[#C41E3A] text-white"
+                    }`}
+                    style={{ backfaceVisibility: "hidden" }}
+                  >
+                    <span className="text-xl font-bold heading-serif mb-2">{card.word}</span>
+                    <span className="text-xs opacity-75 body-sans">{t("flashcards.flipToSee")}</span>
+                  </div>
+                  
+                  {/* Back */}
+                  <div
+                    className="absolute inset-0 rounded-xl p-4 flex flex-col items-center justify-center text-center bg-white border-2 border-[#E4E4E7] shadow-lg"
+                    style={{
+                      backfaceVisibility: "hidden",
+                      transform: "rotateY(180deg)",
+                    }}
+                  >
+                    <span className="text-lg font-bold text-[#1A201C] heading-serif mb-1">{card.translation}</span>
+                    <span className="text-xs text-[#52525B] body-sans mb-2">/{card.pronunciation}/</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      activeLanguage === "bulgarian" ? "bg-[#E8F5E9] text-[#1B5E3C]" : "bg-[#FDE8EB] text-[#C41E3A]"
+                    }`}>
+                      {card.category}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Practice More Button */}
+        <div className="text-center mt-12">
+          <Button
+            asChild
+            className="bg-[#1B5E3C] hover:bg-[#0D3321] text-white rounded-full px-8 py-6 text-lg font-semibold"
+            data-testid="practice-more-btn"
+          >
+            <a href="#courses">
+              {t("flashcards.practiceMore")}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </a>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // Why Choose Us Section
 const WhyUsSection = () => {
   const { t } = useLanguage();

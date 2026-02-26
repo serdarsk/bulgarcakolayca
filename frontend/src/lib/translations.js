@@ -235,6 +235,18 @@ export const translations = {
         { title: "Online & Hybrid", desc: "In-person or online participation options" },
       ],
     },
+    // Flashcards Section
+    flashcards: {
+      sectionTitle: "Vocabulary Cards",
+      sectionSubtitle: "Click on cards to see the translation",
+      bulgarian: "Bulgarian Words",
+      turkish: "Turkish Words",
+      flipToSee: "Click to flip",
+      pronunciation: "Pronunciation",
+      category: "Category",
+      showAll: "Show All",
+      practiceMore: "Practice More",
+    },
     // Pricing Table Section
     pricing: {
       sectionTitle: "Pricing Comparison",

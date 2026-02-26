@@ -5,6 +5,7 @@ export const translations = {
       home: "Ana Sayfa",
       about: "Hakkımızda",
       courses: "Kurslar",
+      flashcards: "Kelime Kartları",
       pricing: "Fiyatlar",
       levelTest: "Seviye Testi",
       contact: "İletişim",

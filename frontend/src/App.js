@@ -1250,6 +1250,7 @@ function App() {
           <HeroSection />
           <AboutSection />
           <CoursesSection />
+          <FlashcardsSection />
           <WhyUsSection />
           <PricingSection />
           <LevelTestSection />

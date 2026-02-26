@@ -306,8 +306,8 @@ const AboutSection = () => {
             <p className="text-sm font-medium tracking-wide uppercase text-[#C41E3A] mb-4 body-sans">
               {t("about.sectionTitle")}
             </p>
-            <h2 className="heading-serif text-3xl md:text-4xl lg:text-5xl font-bold text-[#1A201C] mb-6">
-              {t("about.sectionTitle")}
+            <h2 className="heading-serif text-3xl md:text-4xl lg:text-5xl font-bold text-[#1A201C] mb-2">
+              {t("about.teacherName") || "Fatma Uslu Özşeker"}
             </h2>
             <p className="text-lg text-[#52525B] mb-8 body-sans leading-relaxed">
               {t("about.bio")}

@@ -20,9 +20,10 @@ export const translations = {
     // About Section
     about: {
       sectionTitle: "Eğitmeninizle Tanışın",
+      teacherName: "Fatma Uslu Özşeker",
       credentials: "Yeterlilikler",
       whyDifferent: "Neden Farklıyız?",
-      bio: "Yıllarca tecrübe ile Bulgarca ve Türkçe dil eğitiminde uzmanlaşmış, sonuç odaklı bir öğretim metodolojisi sunuyorum. Her öğrencinin benzersiz ihtiyaçlarını anlayarak, kişiselleştirilmiş bir öğrenme deneyimi sağlıyorum.",
+      bio: "Ben Fatma Uslu Özşeker. Yıllarca tecrübe ile Bulgarca ve Türkçe dil eğitiminde uzmanlaşmış, sonuç odaklı bir öğretim metodolojisi sunuyorum. Her öğrencinin benzersiz ihtiyaçlarını anlayarak, kişiselleştirilmiş bir öğrenme deneyimi sağlıyorum.",
       credential1: "Dil Eğitimi Sertifikası",
       credential2: "10+ Yıl Deneyim",
       credential3: "500+ Başarılı Öğrenci",
@@ -163,9 +164,10 @@ export const translations = {
     // About Section
     about: {
       sectionTitle: "Meet Your Instructor",
+      teacherName: "Fatma Uslu Özşeker",
       credentials: "Credentials",
       whyDifferent: "Why We're Different",
-      bio: "With years of experience, I specialize in Bulgarian and Turkish language education, offering a result-oriented teaching methodology. Understanding each student's unique needs, I provide a personalized learning experience.",
+      bio: "I'm Fatma Uslu Özşeker. With years of experience, I specialize in Bulgarian and Turkish language education, offering a result-oriented teaching methodology. Understanding each student's unique needs, I provide a personalized learning experience.",
       credential1: "Language Education Certificate",
       credential2: "10+ Years Experience",
       credential3: "500+ Successful Students",
@@ -306,9 +308,10 @@ export const translations = {
     // About Section
     about: {
       sectionTitle: "Запознайте се с вашия инструктор",
+      teacherName: "Фатма Услу Йозшекер",
       credentials: "Квалификации",
       whyDifferent: "Защо сме различни?",
-      bio: "С години опит съм специализиран в преподаването на български и турски език, предлагайки резултатно ориентирана методология на обучение. Разбирайки уникалните нужди на всеки ученик, осигурявам персонализирано учебно изживяване.",
+      bio: "Аз съм Фатма Услу Йозшекер. С години опит съм специализирана в преподаването на български и турски език, предлагайки резултатно ориентирана методология на обучение. Разбирайки уникалните нужди на всеки ученик, осигурявам персонализирано учебно изживяване.",
       credential1: "Сертификат за езиково образование",
       credential2: "10+ години опит",
       credential3: "500+ успешни ученици",

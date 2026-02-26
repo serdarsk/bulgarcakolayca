@@ -292,8 +292,8 @@ const AboutSection = () => {
           <div className="lg:col-span-5">
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1597561030767-5ce58b1a2393?auto=format&fit=crop&q=80&w=600"
-                alt="Instructor"
+                src="https://customer-assets.emergentagent.com/job_kolayca-courses/artifacts/l4a5pvrq_image.png"
+                alt="Fatma Uslu Özşeker"
                 className="rounded-2xl shadow-xl w-full object-cover aspect-[4/5]"
                 data-testid="instructor-photo"
               />

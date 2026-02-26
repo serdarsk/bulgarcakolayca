@@ -273,8 +273,6 @@ const StatsRibbon = () => {
         </div>
       ))}
     </div>
-      </div>
-    </section>
   );
 };
 

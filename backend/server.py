@@ -222,6 +222,66 @@ QUIZ_QUESTIONS = {
     ]
 }
 
+# Flashcards Data - Kelime Kartları
+FLASHCARDS = {
+    "bulgarian": [
+        {"id": 1, "word": "Здравей", "translation": "Merhaba", "pronunciation": "Zdra-vey", "category": "挨拶"},
+        {"id": 2, "word": "Благодаря", "translation": "Teşekkür ederim", "pronunciation": "Bla-go-da-rya", "category": "Günlük"},
+        {"id": 3, "word": "Да", "translation": "Evet", "pronunciation": "Da", "category": "Temel"},
+        {"id": 4, "word": "Не", "translation": "Hayır", "pronunciation": "Ne", "category": "Temel"},
+        {"id": 5, "word": "Моля", "translation": "Lütfen / Rica ederim", "pronunciation": "Mo-lya", "category": "Günlük"},
+        {"id": 6, "word": "Добро утро", "translation": "Günaydın", "pronunciation": "Dob-ro ut-ro", "category": "Selamlaşma"},
+        {"id": 7, "word": "Лека нощ", "translation": "İyi geceler", "pronunciation": "Le-ka nosht", "category": "Selamlaşma"},
+        {"id": 8, "word": "Как се казваш?", "translation": "Adın ne?", "pronunciation": "Kak se kaz-vash", "category": "Tanışma"},
+        {"id": 9, "word": "Аз съм", "translation": "Ben ...-im", "pronunciation": "Az sam", "category": "Temel"},
+        {"id": 10, "word": "Довиждане", "translation": "Hoşça kal", "pronunciation": "Do-vizh-da-ne", "category": "Selamlaşma"},
+        {"id": 11, "word": "Извинете", "translation": "Özür dilerim", "pronunciation": "Iz-vi-ne-te", "category": "Günlük"},
+        {"id": 12, "word": "Колко струва?", "translation": "Ne kadar?", "pronunciation": "Kol-ko stru-va", "category": "Alışveriş"},
+        {"id": 13, "word": "Един", "translation": "Bir", "pronunciation": "E-din", "category": "Sayılar"},
+        {"id": 14, "word": "Два", "translation": "İki", "pronunciation": "Dva", "category": "Sayılar"},
+        {"id": 15, "word": "Три", "translation": "Üç", "pronunciation": "Tri", "category": "Sayılar"},
+        {"id": 16, "word": "Вода", "translation": "Su", "pronunciation": "Vo-da", "category": "Yiyecek"},
+        {"id": 17, "word": "Хляб", "translation": "Ekmek", "pronunciation": "Hlyab", "category": "Yiyecek"},
+        {"id": 18, "word": "Къде е...?", "translation": "... nerede?", "pronunciation": "Ka-de e", "category": "Yön"},
+        {"id": 19, "word": "Обичам те", "translation": "Seni seviyorum", "pronunciation": "O-bi-cham te", "category": "Duygular"},
+        {"id": 20, "word": "Приятно ми е", "translation": "Memnun oldum", "pronunciation": "Pri-yat-no mi e", "category": "Tanışma"},
+    ],
+    "turkish": [
+        {"id": 1, "word": "Merhaba", "translation": "Здравей", "pronunciation": "Mer-ha-ba", "category": "Selamlaşma"},
+        {"id": 2, "word": "Teşekkürler", "translation": "Благодаря", "pronunciation": "Te-shek-kür-ler", "category": "Günlük"},
+        {"id": 3, "word": "Evet", "translation": "Да", "pronunciation": "E-vet", "category": "Temel"},
+        {"id": 4, "word": "Hayır", "translation": "Не", "pronunciation": "Ha-yır", "category": "Temel"},
+        {"id": 5, "word": "Lütfen", "translation": "Моля", "pronunciation": "Lüt-fen", "category": "Günlük"},
+        {"id": 6, "word": "Günaydın", "translation": "Добро утро", "pronunciation": "Gü-nay-dın", "category": "Selamlaşma"},
+        {"id": 7, "word": "İyi geceler", "translation": "Лека нощ", "pronunciation": "İ-yi ge-ce-ler", "category": "Selamlaşma"},
+        {"id": 8, "word": "Adınız ne?", "translation": "Как се казвате?", "pronunciation": "A-dı-nız ne", "category": "Tanışma"},
+        {"id": 9, "word": "Ben", "translation": "Аз", "pronunciation": "Ben", "category": "Temel"},
+        {"id": 10, "word": "Hoşça kal", "translation": "Довиждане", "pronunciation": "Hosh-cha kal", "category": "Selamlaşma"},
+        {"id": 11, "word": "Özür dilerim", "translation": "Извинете", "pronunciation": "Ö-zür di-le-rim", "category": "Günlük"},
+        {"id": 12, "word": "Ne kadar?", "translation": "Колко струва?", "pronunciation": "Ne ka-dar", "category": "Alışveriş"},
+        {"id": 13, "word": "Bir", "translation": "Един", "pronunciation": "Bir", "category": "Sayılar"},
+        {"id": 14, "word": "İki", "translation": "Два", "pronunciation": "İ-ki", "category": "Sayılar"},
+        {"id": 15, "word": "Üç", "translation": "Три", "pronunciation": "Üch", "category": "Sayılar"},
+        {"id": 16, "word": "Su", "translation": "Вода", "pronunciation": "Su", "category": "Yiyecek"},
+        {"id": 17, "word": "Ekmek", "translation": "Хляб", "pronunciation": "Ek-mek", "category": "Yiyecek"},
+        {"id": 18, "word": "Nerede?", "translation": "Къде?", "pronunciation": "Ne-re-de", "category": "Yön"},
+        {"id": 19, "word": "Seni seviyorum", "translation": "Обичам те", "pronunciation": "Se-ni se-vi-yo-rum", "category": "Duygular"},
+        {"id": 20, "word": "Memnun oldum", "translation": "Приятно ми е", "pronunciation": "Mem-nun ol-dum", "category": "Tanışma"},
+    ]
+}
+
+# Flashcard Endpoints
+@api_router.get("/flashcards/{language}")
+async def get_flashcards(language: str, category: Optional[str] = None):
+    if language not in FLASHCARDS:
+        raise HTTPException(status_code=404, detail="Language not found")
+    
+    cards = FLASHCARDS[language]
+    if category:
+        cards = [c for c in cards if c["category"].lower() == category.lower()]
+    
+    return {"language": language, "cards": cards, "total": len(cards)}
+
 # Routes
 @api_router.get("/")
 async def root():

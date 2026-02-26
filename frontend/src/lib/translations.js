@@ -319,6 +319,7 @@ export const translations = {
       home: "Начало",
       about: "За нас",
       courses: "Курсове",
+      flashcards: "Думи",
       pricing: "Цени",
       levelTest: "Тест за ниво",
       contact: "Контакт",

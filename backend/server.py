@@ -225,7 +225,7 @@ QUIZ_QUESTIONS = {
 # Flashcards Data - Kelime Kartları
 FLASHCARDS = {
     "bulgarian": [
-        {"id": 1, "word": "Здравей", "translation": "Merhaba", "pronunciation": "Zdra-vey", "category": "挨拶"},
+        {"id": 1, "word": "Здравей", "translation": "Merhaba", "pronunciation": "Zdra-vey", "category": "Selamlaşma"},
         {"id": 2, "word": "Благодаря", "translation": "Teşekkür ederim", "pronunciation": "Bla-go-da-rya", "category": "Günlük"},
         {"id": 3, "word": "Да", "translation": "Evet", "pronunciation": "Da", "category": "Temel"},
         {"id": 4, "word": "Не", "translation": "Hayır", "pronunciation": "Ne", "category": "Temel"},

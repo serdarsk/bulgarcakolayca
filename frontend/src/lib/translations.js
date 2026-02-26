@@ -162,6 +162,7 @@ export const translations = {
       home: "Home",
       about: "About",
       courses: "Courses",
+      flashcards: "Vocabulary",
       pricing: "Pricing",
       levelTest: "Level Test",
       contact: "Contact",

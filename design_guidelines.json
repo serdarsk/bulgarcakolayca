@@ -1,0 +1,152 @@
+{
+  "project_name": "BulgarcaKolayca",
+  "design_philosophy": {
+    "theme": "The Modern Academy",
+    "vibe": "Academic, Trustworthy, Structured, European, Welcoming",
+    "core_principles": [
+      "Clarity over Decoration: Content must be legible and structured like a well-designed textbook.",
+      "Trust through Color: Deep Green anchors the brand in education and growth.",
+      "Action through Red: Red is used ONLY for primary actions (CTAs) to guide the user.",
+      "Whitespace as Luxury: Generous padding (p-12, p-24) to create a premium educational feel."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Playfair Display, serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-5xl md:text-6xl font-bold tracking-tight leading-tight",
+      "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-medium",
+      "body_lg": "text-lg md:text-xl leading-relaxed text-muted-foreground",
+      "body": "text-base leading-relaxed text-muted-foreground",
+      "caption": "text-sm font-medium tracking-wide uppercase text-muted-foreground"
+    },
+    "imports": [
+      "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');"
+    ]
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#1B5E3C",
+        "foreground": "#FFFFFF",
+        "50": "#E8F5E9",
+        "100": "#C8E6C9",
+        "900": "#0D3321"
+      },
+      "secondary": {
+        "DEFAULT": "#F9F9F7",
+        "foreground": "#1B5E3C"
+      },
+      "accent": {
+        "DEFAULT": "#C41E3A",
+        "foreground": "#FFFFFF",
+        "hover": "#A01830"
+      },
+      "background": "#FFFFFF",
+      "surface": "#F9F9F7",
+      "text": {
+        "main": "#1A201C",
+        "muted": "#52525B"
+      },
+      "border": "#E4E4E7"
+    },
+    "usage_rules": {
+      "primary": "Use for Headings, Borders on active cards, Icons, and Footer background.",
+      "accent": "Use STRICTLY for 'Sign Up', 'Start Quiz', and 'Get Started' buttons.",
+      "surface": "Use for section backgrounds (alternating with white) to create rhythm."
+    }
+  },
+  "layout_strategies": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "section_spacing": "py-20 md:py-32",
+    "grid_system": "grid grid-cols-1 md:grid-cols-12 gap-8",
+    "bento_grid": "Use for 'Course Structure' and 'Why Choose Us'. Mix col-span-4 and col-span-8 for variety."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-accent hover:bg-accent/90 text-white rounded-full px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300",
+      "secondary": "bg-transparent border-2 border-primary text-primary hover:bg-primary/5 rounded-full px-8 py-6 text-lg font-medium transition-all duration-300",
+      "ghost": "text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
+    },
+    "cards": {
+      "style": "bg-white rounded-2xl border border-border p-8 shadow-sm hover:shadow-md transition-shadow duration-300",
+      "pricing": "relative overflow-hidden rounded-3xl border-2 border-border hover:border-primary transition-colors duration-300"
+    },
+    "inputs": {
+      "style": "h-12 rounded-lg border-input bg-background px-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "0 4px 20px -2px rgba(27, 94, 60, 0.1)",
+      "hover": "0 10px 40px -10px rgba(27, 94, 60, 0.2)"
+    },
+    "gradients": {
+      "hero_overlay": "linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%)",
+      "subtle_glow": "radial-gradient(circle at 50% 50%, rgba(27, 94, 60, 0.05) 0%, rgba(255,255,255,0) 70%)"
+    },
+    "borders": "1px solid #E4E4E7 (Neutral) or 1px solid #1B5E3C (Active/Focus)"
+  },
+  "image_urls": {
+    "hero_bg": "https://images.unsplash.com/photo-1703515259143-694fe7628a2f?auto=format&fit=crop&q=80",
+    "students_collaborating": "https://images.pexels.com/photos/6283211/pexels-photo-6283211.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "student_focused": "https://images.unsplash.com/photo-1752920299210-0b727800ea50?auto=format&fit=crop&q=80",
+    "teacher_portrait": "https://images.unsplash.com/photo-1597561030767-5ce58b1a2393?auto=format&fit=crop&q=80",
+    "istanbul_landmark": "https://images.unsplash.com/photo-1736299298182-f90904857d49?auto=format&fit=crop&q=80",
+    "logo_url": "https://customer-assets.emergentagent.com/job_2d64ef58-c386-4e0e-a863-1ce75f20d54b/artifacts/p8omxwrl_image.png"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "preferred_set": "BookOpen, GraduationCap, Globe, Languages, CheckCircle2, Star, PlayCircle, ArrowRight"
+  },
+  "sections_structure": [
+    {
+      "name": "Hero",
+      "type": "split_visual",
+      "elements": ["H1 Heading", "Subheading", "Primary CTA (Start Learning)", "Secondary CTA (Watch Video)", "Background Image with Overlay or Video"]
+    },
+    {
+      "name": "Stats/Trust",
+      "type": "ribbon",
+      "elements": ["Active Students", "Success Rate", "Certified Teachers"]
+    },
+    {
+      "name": "About Teacher",
+      "type": "asymmetric_grid",
+      "elements": ["Portrait Image", "Bio Text", "Credentials", "Signature"]
+    },
+    {
+      "name": "Courses",
+      "type": "cards_grid",
+      "elements": ["A1 Beginner Card", "A2 Elementary Card", "Price Tags", "Feature Lists"]
+    },
+    {
+      "name": "Level Quiz",
+      "type": "interactive_panel",
+      "elements": ["Quiz Introduction", "Start Button", "Visual Illustration"]
+    },
+    {
+      "name": "Contact",
+      "type": "split_form",
+      "elements": ["Contact Form", "Contact Info/Map"]
+    }
+  ],
+  "accessibility_checklist": [
+    "Ensure 4.5:1 contrast ratio for all text.",
+    "Use semantic HTML (header, main, footer, article, section).",
+    "All images must have alt text.",
+    "Focus states must be visible (ring-2 ring-primary).",
+    "Touch targets must be at least 44x44px."
+  ],
+  "universal_guidelines": [
+    "Do NOT use gradients for text.",
+    "Avoid centering long paragraphs. Left align for readability.",
+    "Use 'rounded-xl' or 'rounded-2xl' for a modern, friendly academic look.",
+    "Buttons should be pill-shaped (rounded-full) to contrast with the rectangular cards.",
+    "Input fields should have a distinct focus state with the primary green color."
+  ]
+}

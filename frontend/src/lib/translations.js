@@ -391,6 +391,18 @@ export const translations = {
         { title: "Онлайн и хибрид", desc: "Присъствено или онлайн участие" },
       ],
     },
+    // Flashcards Section
+    flashcards: {
+      sectionTitle: "Карти с думи",
+      sectionSubtitle: "Кликнете върху картите, за да видите превода",
+      bulgarian: "Български думи",
+      turkish: "Турски думи",
+      flipToSee: "Кликнете за обръщане",
+      pronunciation: "Произношение",
+      category: "Категория",
+      showAll: "Покажи всички",
+      practiceMore: "Още практика",
+    },
     // Pricing Table Section
     pricing: {
       sectionTitle: "Сравнение на цените",

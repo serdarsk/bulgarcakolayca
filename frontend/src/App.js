@@ -81,6 +81,7 @@ const Navigation = () => {
   const navLinks = [
     { href: "#about", label: t("nav.about") },
     { href: "#courses", label: t("nav.courses") },
+    { href: "#flashcards", label: t("nav.flashcards") || "Kelime Kartları" },
     { href: "#pricing", label: t("nav.pricing") },
     { href: "#level-test", label: t("nav.levelTest") },
     { href: "#contact", label: t("nav.contact") },

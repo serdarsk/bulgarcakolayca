@@ -243,27 +243,36 @@ const HeroSection = () => {
         </div>
 
         {/* Stats Ribbon */}
-        <div className="mt-16 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { icon: Users, value: "500+", label: { tr: "Başarılı Öğrenci", en: "Successful Students", bg: "Успешни ученици" } },
-            { icon: Star, value: "98%", label: { tr: "Memnuniyet", en: "Satisfaction", bg: "Удовлетворение" } },
-            { icon: Award, value: "10+", label: { tr: "Yıl Deneyim", en: "Years Experience", bg: "Години опит" } },
-            { icon: Globe, value: "2", label: { tr: "Dil Seçeneği", en: "Languages", bg: "Езика" } },
-          ].map((stat, index) => {
-            const { lang } = useLanguage();
-            return (
-              <div 
-                key={index} 
-                className="text-center p-6 bg-white rounded-2xl shadow-sm border border-[#E4E4E7]"
-                data-testid={`stat-${index}`}
-              >
-                <stat.icon className="h-8 w-8 mx-auto mb-3 text-[#1B5E3C]" />
-                <div className="text-3xl font-bold text-[#1A201C] heading-serif">{stat.value}</div>
-                <div className="text-sm text-[#52525B] body-sans">{stat.label[lang]}</div>
-              </div>
-            );
-          })}
+        <StatsRibbon />
+      </div>
+    </section>
+  );
+};
+
+// Stats Ribbon Component
+const StatsRibbon = () => {
+  const { lang } = useLanguage();
+  const stats = [
+    { icon: Users, value: "500+", label: { tr: "Başarılı Öğrenci", en: "Successful Students", bg: "Успешни ученици" } },
+    { icon: Star, value: "98%", label: { tr: "Memnuniyet", en: "Satisfaction", bg: "Удовлетворение" } },
+    { icon: Award, value: "10+", label: { tr: "Yıl Deneyim", en: "Years Experience", bg: "Години опит" } },
+    { icon: Globe, value: "2", label: { tr: "Dil Seçeneği", en: "Languages", bg: "Езика" } },
+  ];
+
+  return (
+    <div className="mt-16 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-6">
+      {stats.map((stat, index) => (
+        <div 
+          key={index} 
+          className="text-center p-6 bg-white rounded-2xl shadow-sm border border-[#E4E4E7]"
+          data-testid={`stat-${index}`}
+        >
+          <stat.icon className="h-8 w-8 mx-auto mb-3 text-[#1B5E3C]" />
+          <div className="text-3xl font-bold text-[#1A201C] heading-serif">{stat.value}</div>
+          <div className="text-sm text-[#52525B] body-sans">{stat.label[lang]}</div>
         </div>
+      ))}
+    </div>
       </div>
     </section>
   );

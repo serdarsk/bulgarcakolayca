@@ -1,34 +1,180 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* BulgarcaKolayca Custom Styles */
+
+/* Smooth scroll for all anchor links */
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-.App-link {
-    color: #61dafb;
+::-webkit-scrollbar-thumb {
+  background: #1B5E3C;
+  border-radius: 4px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: #0D3321;
+}
+
+/* Hero video container */
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px -10px rgba(27, 94, 60, 0.2);
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 1rem;
+}
+
+/* Card hover effects */
+.course-card {
+  transition: all 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -15px rgba(27, 94, 60, 0.2);
+}
+
+/* Button animations */
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(196, 30, 58, 0.3);
+}
+
+/* Section transitions */
+section {
+  opacity: 1;
+}
+
+/* Feature card icons */
+.feature-icon {
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+}
+
+/* Quiz modal animations */
+.quiz-modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.quiz-modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Language switcher */
+.lang-switcher {
+  transition: all 0.2s ease;
+}
+
+.lang-switcher:hover {
+  background-color: rgba(27, 94, 60, 0.1);
+}
+
+/* Pricing table hover */
+.pricing-row:hover {
+  background-color: rgba(27, 94, 60, 0.05);
+}
+
+/* Form input focus effects */
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(27, 94, 60, 0.2);
+}
+
+/* Navigation shadow on scroll */
+.nav-scrolled {
+  box-shadow: 0 4px 20px -2px rgba(27, 94, 60, 0.1);
+}
+
+/* Mobile menu animation */
+.mobile-menu-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.mobile-menu-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Progress bar for quiz */
+.quiz-progress {
+  transition: width 0.3s ease;
+}
+
+/* Credential badges */
+.credential-badge {
+  transition: all 0.2s ease;
+}
+
+.credential-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(27, 94, 60, 0.15);
+}
+
+/* Footer links */
+.footer-link {
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #C41E3A;
+}
+
+/* WhatsApp button pulse */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.whatsapp-btn:hover {
+  animation: pulse 1s infinite;
+}
+
+/* Stats counter animation placeholder */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .course-card:hover {
+    transform: none;
+  }
+  
+  .btn-primary:hover {
+    transform: none;
+  }
 }

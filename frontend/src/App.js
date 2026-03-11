@@ -1092,6 +1092,8 @@ const LevelTestSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [levels] = useState(["A1", "A2", "B1", "B2", "C1"]);
 
+  const [wrongCountPerLevel, setWrongCountPerLevel] = useState({});
+
   const fetchAllQuestions = async (language) => {
     try {
       const response = await axios.get(`${API}/quiz/all-questions/${language}`);
@@ -1119,6 +1121,22 @@ const LevelTestSection = () => {
 
   const handleAnswer = (optionIndex) => {
     const qId = currentQuestion.id;
+    const questions = getCurrentQuestions();
+    const correctAnswer = currentQuestion.correct;
+    
+    // Check if answer is wrong
+    const isWrong = optionIndex !== correctAnswer;
+    
+    // Update wrong count for current level
+    const currentWrongCount = wrongCountPerLevel[currentLevel] || 0;
+    const newWrongCount = isWrong ? currentWrongCount + 1 : currentWrongCount;
+    
+    const newWrongCountPerLevel = {
+      ...wrongCountPerLevel,
+      [currentLevel]: newWrongCount
+    };
+    setWrongCountPerLevel(newWrongCountPerLevel);
+    
     const newLevelAnswers = {
       ...levelAnswers,
       [currentLevel]: [
@@ -1128,7 +1146,13 @@ const LevelTestSection = () => {
     };
     setLevelAnswers(newLevelAnswers);
 
-    const questions = getCurrentQuestions();
+    // If 3 wrong answers in this level, stop and submit
+    if (newWrongCount >= 3) {
+      handleSubmitWithAnswers(newLevelAnswers);
+      return;
+    }
+
+    // Move to next question or level
     if (currentQuestionIndex + 1 < questions.length) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
@@ -1172,6 +1196,7 @@ const LevelTestSection = () => {
     setCurrentLevel("A1");
     setCurrentQuestionIndex(0);
     setLevelAnswers({});
+    setWrongCountPerLevel({});
     setResult(null);
   };
 
@@ -1390,8 +1415,8 @@ const LevelTestSection = () => {
                 <ul className="text-sm text-[#52525B] space-y-1">
                   <li>• A1'den C1'e kadar 5 seviye</li>
                   <li>• Her seviyede 5-6 soru</li>
-                  <li>• %67 başarı ile üst seviyeye geçiş</li>
-                  <li>• Toplam yaklaşık 25-27 soru</li>
+                  <li>• 3 yanlış cevapda test sonlanır</li>
+                  <li>• Seviye geçiş için %67 başarı gerekli</li>
                 </ul>
               </div>
 
@@ -1447,10 +1472,12 @@ const LevelTestSection = () => {
                   <h3 className="text-lg font-semibold text-[#1A201C] heading-serif">
                     {currentQuestion.question}
                   </h3>
-                  {currentQuestion.translation && currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "tr"] && (
-                    <p className="text-sm text-[#52525B] italic body-sans">
-                      ({currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "tr"]})
-                    </p>
+                  
+                  {/* Wrong answers indicator */}
+                  {wrongCountPerLevel[currentLevel] > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-[#C41E3A]">Yanlış: {wrongCountPerLevel[currentLevel]}/3</span>
+                    </div>
                   )}
                   
                   <div className="space-y-2">

@@ -636,7 +636,7 @@ async def get_all_quiz_questions(language: str):
                     "id": q["id"],
                     "question": q["question"],
                     "options": q["options"],
-                    "translation": q.get("translation", {})
+                    "correct": q["correct"]  # Include correct answer for client-side 3-wrong check
                 })
             all_questions[level] = questions
     

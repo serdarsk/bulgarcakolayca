@@ -277,6 +277,67 @@ const StatsRibbon = () => {
   );
 };
 
+// Who Is This For Section
+const WhoIsThisForSection = () => {
+  const { t, lang } = useLanguage();
+  
+  const targetAudience = {
+    tr: [
+      { icon: GraduationCap, text: "Bulgarca öğrenmeye yeni başlayanlar" },
+      { icon: Globe, text: "Bulgaristan'da eğitim veya iş hedefleyenler" },
+      { icon: MapPin, text: "Bulgaristan'a taşınmayı planlayanlar" },
+      { icon: BookOpen, text: "Mevcut seviyelerini geliştirmek ve pratik yapmak isteyenler" },
+      { icon: Languages, text: "Balkan kültürüne merak duyanlar" },
+    ],
+    en: [
+      { icon: GraduationCap, text: "Beginners in learning Bulgarian" },
+      { icon: Globe, text: "Those aiming for education or work in Bulgaria" },
+      { icon: MapPin, text: "Those planning to move to Bulgaria" },
+      { icon: BookOpen, text: "Those who want to improve their current level and practice" },
+      { icon: Languages, text: "Those curious about Balkan culture" },
+    ],
+    bg: [
+      { icon: GraduationCap, text: "Начинаещи в изучаването на български" },
+      { icon: Globe, text: "Тези, които се стремят към образование или работа в България" },
+      { icon: MapPin, text: "Тези, които планират да се преместят в България" },
+      { icon: BookOpen, text: "Тези, които искат да подобрят нивото си и да практикуват" },
+      { icon: Languages, text: "Тези, които се интересуват от балканската култура" },
+    ],
+  };
+
+  const titles = {
+    tr: "Bu Kurs Kimler İçin?",
+    en: "Who Is This Course For?",
+    bg: "За кого е този курс?",
+  };
+
+  return (
+    <section 
+      id="who-is-this-for" 
+      data-testid="who-is-this-for-section"
+      className="py-16 md:py-24 bg-[#1B5E3C]"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="heading-serif text-3xl md:text-4xl font-bold text-white text-center mb-12">
+          {titles[lang]}
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {targetAudience[lang].map((item, index) => (
+            <div 
+              key={index}
+              className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center hover:bg-white/20 transition-all"
+              data-testid={`target-audience-${index}`}
+            >
+              <item.icon className="h-10 w-10 mx-auto mb-4 text-white" />
+              <p className="text-white body-sans text-sm leading-relaxed">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // About Section
 const AboutSection = () => {
   const { t } = useLanguage();
@@ -472,6 +533,187 @@ const CoursesSection = () => {
               </Card>
             );
           })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Curriculum Section
+const CurriculumSection = () => {
+  const { lang } = useLanguage();
+  const [activeLevel, setActiveLevel] = useState("a1");
+
+  const titles = {
+    tr: "Müfredat İçeriği",
+    en: "Curriculum Content",
+    bg: "Съдържание на учебната програма",
+  };
+
+  const subtitles = {
+    tr: "Her seviyede neler öğreneceksiniz",
+    en: "What you will learn at each level",
+    bg: "Какво ще научите на всяко ниво",
+  };
+
+  const grammarTitle = { tr: "Gramer Konuları", en: "Grammar Topics", bg: "Граматика" };
+  const skillsTitle = { tr: "İletişim Becerileri", en: "Communication Skills", bg: "Комуникативни умения" };
+
+  const curriculum = {
+    a1: {
+      grammar: [
+        "Alfabe (Азбука)",
+        "Kişi Zamirleri (Лични местоимения)",
+        "Olmak Fiili - Şimdiki Zaman (Сегашно време на глагола съм)",
+        "Soru Kelimeleri (Въпросителни думи)",
+        "İsimlerin Cinsiyeti (Род на съществителните)",
+        "Çoğul Yapısı (Множествено число)",
+        "Belirli Artikel (Определителен член)",
+        "İyelik Zamirleri (Притежателни местоимения)",
+        "Sıfatların Cinsiyeti ve Çoğulu",
+        "Karşılaştırma ve Üstünlük Dereceleri",
+        "Zaman Edatları (Предлози за време)",
+        "Yer Edatları (Предлози за място)",
+        "Hareket Edatları (Предлози за движение)",
+        "Sıklık Zarfları (Наречия за честота)",
+      ],
+      skills: [
+        "Selamlaşma ve vedalaşma",
+        "Kendini ve başkalarını tanıtma",
+        "Milliyet hakkında soru sorma ve cevaplama",
+        "Odaları ve mobilyaları adlandırma",
+        "Aile üyeleri hakkında konuşma",
+        "Hava durumu hakkında konuşma",
+        "Günler ve ayları söyleme",
+        "Saati sorma ve söyleme",
+        "Günlük aktiviteleri anlatma",
+        "Kıyafetleri ve renkleri adlandırma",
+        "Toplu taşıma kullanma",
+        "Yol tarifi sorma ve verme",
+        "Yiyecek ürünlerini adlandırma",
+        "Restoranda sipariş verme",
+      ],
+    },
+    a2: {
+      grammar: [
+        "Kişi Zamirlerinin İsmin -i Hali (Винителни форми)",
+        "Kişi Zamirlerinin İsmin -e Hali (Дателни форми)",
+        "Olmak Fiili - Gelecek Zaman (Бъдеще време)",
+        "Fiil Görünüşü (Вид на глагола)",
+        "Tamamlanmamış Fiillerin Gelecek Zamanı",
+        "Modal Fiiller (Модални глаголи)",
+        "Geçmiş Zaman (-АХ/-ЯХ grubu)",
+        "Geçmiş Zaman (-ИХ grubu)",
+        "Geçmiş Zaman (-ОХ grubu)",
+        "Bağlaçlar (Съюзи)",
+        "Emir Kipi (Повелително наклонение)",
+        "Belirsiz Geçmiş Zaman (Минало неопределено време)",
+      ],
+      skills: [
+        "Telefon görüşmeleri yapma",
+        "Randevu ayarlama",
+        "Davet etme ve kabul etme",
+        "Vücut bölümlerini adlandırma",
+        "Fiziksel durum hakkında konuşma",
+        "Gelecek planlar hakkında konuşma",
+        "İnsanları tarif etme",
+        "Çeşitli hizmetleri kullanma (banka, taksi, otel)",
+        "Rezervasyon yapma",
+        "Geçmişteki olayları anlatma",
+        "Meslekleri adlandırma",
+        "Eğitim ve iş deneyimi hakkında konuşma",
+        "Hobiler ve ilgi alanları hakkında konuşma",
+        "Komut verme",
+      ],
+    },
+  };
+
+  return (
+    <section 
+      id="curriculum" 
+      data-testid="curriculum-section"
+      className="py-20 md:py-32 bg-white"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <p className="text-sm font-medium tracking-wide uppercase text-[#C41E3A] mb-4 body-sans">
+            {titles[lang]}
+          </p>
+          <h2 className="heading-serif text-3xl md:text-4xl lg:text-5xl font-bold text-[#1A201C] mb-4">
+            {titles[lang]}
+          </h2>
+          <p className="text-lg text-[#52525B] body-sans">
+            {subtitles[lang]}
+          </p>
+        </div>
+
+        {/* Level Tabs */}
+        <div className="flex justify-center gap-4 mb-12">
+          <button
+            onClick={() => setActiveLevel("a1")}
+            className={`px-8 py-4 rounded-full font-semibold text-lg transition-all ${
+              activeLevel === "a1"
+                ? "bg-[#1B5E3C] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#1B5E3C]"
+            }`}
+            data-testid="curriculum-a1-tab"
+          >
+            A1 - Başlangıç
+          </button>
+          <button
+            onClick={() => setActiveLevel("a2")}
+            className={`px-8 py-4 rounded-full font-semibold text-lg transition-all ${
+              activeLevel === "a2"
+                ? "bg-[#C41E3A] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#C41E3A]"
+            }`}
+            data-testid="curriculum-a2-tab"
+          >
+            A2 - Temel
+          </button>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Grammar */}
+          <Card className="border-2 border-[#E4E4E7]">
+            <CardHeader className={`${activeLevel === "a1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <BookOpen className="h-6 w-6" />
+                {grammarTitle[lang]}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ul className="space-y-2">
+                {curriculum[activeLevel].grammar.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-sm">
+                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Skills */}
+          <Card className="border-2 border-[#E4E4E7]">
+            <CardHeader className={`${activeLevel === "a1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <MessageCircle className="h-6 w-6" />
+                {skillsTitle[lang]}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ul className="space-y-2">
+                {curriculum[activeLevel].skills.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-sm">
+                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>
@@ -1249,8 +1491,10 @@ function App() {
         <Navigation />
         <main>
           <HeroSection />
+          <WhoIsThisForSection />
           <AboutSection />
           <CoursesSection />
+          <CurriculumSection />
           <FlashcardsSection />
           <WhyUsSection />
           <PricingSection />

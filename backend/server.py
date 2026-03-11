@@ -74,78 +74,88 @@ class LevelTestResult(BaseModel):
     recommended_level: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-# Quiz Questions Data
+# Quiz Questions Data - Updated from official test document
 QUIZ_QUESTIONS = {
     "bulgarian": [
         {
             "id": 1,
-            "question": "Как се казвате?",
-            "options": ["Аз съм от България", "Казвам се Иван", "Добър ден", "Благодаря"],
-            "correct": 1,
-            "translation": {"tr": "Adınız nedir?", "en": "What is your name?"}
+            "question": "Как се казваш?",
+            "options": ["Добър ден.", "Приятно ми е.", "Казвам се Али.", "Да."],
+            "correct": 2,
+            "level": "A1",
+            "translation": {"tr": "Adın ne?", "en": "What is your name?"}
         },
         {
             "id": 2,
-            "question": "'Здравей' ne anlama gelir?",
-            "options": ["Güle güle", "Teşekkürler", "Merhaba", "İyi geceler"],
-            "correct": 2,
-            "translation": {"tr": "'Здравей' ne anlama gelir?", "en": "What does 'Здравей' mean?"}
+            "question": "Ти … от Турция.",
+            "options": ["си", "е", "сте", "съм"],
+            "correct": 0,
+            "level": "A1",
+            "translation": {"tr": "Sen Türkiye'densin. (Boşluğu doldurun)", "en": "You are from Turkey. (Fill in the blank)"}
         },
         {
             "id": 3,
-            "question": "'Един, два, три' sayıları hangileridir?",
-            "options": ["4, 5, 6", "1, 2, 3", "7, 8, 9", "10, 11, 12"],
-            "correct": 1,
-            "translation": {"tr": "'Един, два, три' sayıları hangileridir?", "en": "What numbers are 'Един, два, три'?"}
+            "question": "Избери правилното изречение.",
+            "options": ["Тя е лекар.", "Тя си лекарка.", "Тя е лекарка.", "Тя сте лекар."],
+            "correct": 2,
+            "level": "A1",
+            "translation": {"tr": "Doğru cümleyi seçin.", "en": "Choose the correct sentence."}
         },
         {
             "id": 4,
-            "question": "Doğru cümleyi seçin: 'Ben öğrenciyim'",
-            "options": ["Аз съм учител", "Аз съм студент", "Аз съм доктор", "Аз съм инженер"],
-            "correct": 1,
-            "translation": {"tr": "'Ben öğrenciyim' cümlesini seçin", "en": "Select 'I am a student'"}
+            "question": "На колко години си?",
+            "options": ["На 26 години съм.", "От 26 години си.", "В 26 години сте.", "На 26 година съм."],
+            "correct": 0,
+            "level": "A1",
+            "translation": {"tr": "Kaç yaşındasın?", "en": "How old are you?"}
         },
         {
             "id": 5,
-            "question": "'Добро утро' ne zaman kullanılır?",
-            "options": ["Akşam", "Gece", "Sabah", "Öğlen"],
-            "correct": 2,
-            "translation": {"tr": "'Добро утро' ne zaman kullanılır?", "en": "When is 'Добро утро' used?"}
+            "question": "Къде живееш? - Живея … Бургас.",
+            "options": ["от", "на", "за", "в"],
+            "correct": 3,
+            "level": "A1",
+            "translation": {"tr": "Nerede yaşıyorsun? - Burgaz'da yaşıyorum.", "en": "Where do you live? - I live in Burgas."}
         },
         {
             "id": 6,
-            "question": "'Моля' kelimesinin anlamı nedir?",
-            "options": ["Teşekkürler", "Lütfen/Rica ederim", "Özür dilerim", "Hoşça kal"],
-            "correct": 1,
-            "translation": {"tr": "'Моля' kelimesinin anlamı nedir?", "en": "What does 'Моля' mean?"}
+            "question": "Колко е часът?",
+            "options": ["Два.", "Семейство.", "Да.", "Хляб."],
+            "correct": 0,
+            "level": "A1",
+            "translation": {"tr": "Saat kaç?", "en": "What time is it?"}
         },
         {
             "id": 7,
-            "question": "Hangi cümle 'Nerelisiniz?' anlamına gelir?",
-            "options": ["Как сте?", "Откъде сте?", "Колко сте?", "Кой сте?"],
-            "correct": 1,
-            "translation": {"tr": "Hangi cümle 'Nerelisiniz?' anlamına gelir?", "en": "Which sentence means 'Where are you from?'"}
+            "question": "Вчера … на работа.",
+            "options": ["бях", "ще бъда", "няма да бъда", "бъди"],
+            "correct": 0,
+            "level": "A2",
+            "translation": {"tr": "Dün işteydim. (Boşluğu doldurun)", "en": "Yesterday I was at work. (Fill in the blank)"}
         },
         {
             "id": 8,
-            "question": "'Понеделник' hangi gündür?",
-            "options": ["Salı", "Pazartesi", "Çarşamba", "Perşembe"],
+            "question": "Сега … книга.",
+            "options": ["изчетох", "чета", "чел", "четял"],
             "correct": 1,
-            "translation": {"tr": "'Понеделник' hangi gündür?", "en": "What day is 'Понеделник'?"}
+            "level": "A2",
+            "translation": {"tr": "Şimdi kitap okuyorum. (Boşluğu doldurun)", "en": "Now I'm reading a book. (Fill in the blank)"}
         },
         {
             "id": 9,
-            "question": "'Аз обичам' ifadesi ne anlama gelir?",
-            "options": ["Ben istiyorum", "Ben seviyorum", "Ben biliyorum", "Ben yapıyorum"],
-            "correct": 1,
-            "translation": {"tr": "'Аз обичам' ifadesi ne anlama gelir?", "en": "What does 'Аз обичам' mean?"}
+            "question": "Коя дума е прилагателно име?",
+            "options": ["къща", "ученик", "голям", "стол"],
+            "correct": 2,
+            "level": "A2",
+            "translation": {"tr": "Hangi kelime sıfattır?", "en": "Which word is an adjective?"}
         },
         {
             "id": 10,
-            "question": "Bulgarca'da 'Evet' nasıl söylenir?",
-            "options": ["Не", "Да", "Може", "Добре"],
+            "question": "Не … да пиша сега.",
+            "options": ["правя", "мога", "нямам", "готвя"],
             "correct": 1,
-            "translation": {"tr": "Bulgarca'da 'Evet' nasıl söylenir?", "en": "How do you say 'Yes' in Bulgarian?"}
+            "level": "A2",
+            "translation": {"tr": "Şimdi yazamıyorum. (Boşluğu doldurun)", "en": "I can't write now. (Fill in the blank)"}
         }
     ],
     "turkish": [

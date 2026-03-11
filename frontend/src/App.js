@@ -82,7 +82,6 @@ const Navigation = () => {
     { href: "#about", label: t("nav.about") },
     { href: "#courses", label: t("nav.courses") },
     { href: "#flashcards", label: t("nav.flashcards") || "Kelime Kartları" },
-    { href: "#pricing", label: t("nav.pricing") },
     { href: "#level-test", label: t("nav.levelTest") },
     { href: "#contact", label: t("nav.contact") },
   ];
@@ -420,16 +419,10 @@ const CoursesSection = () => {
   const { t, lang } = useLanguage();
 
   const courses = [
-    {
-      key: "a1",
-      color: "green",
-      icon: BookOpen,
-    },
-    {
-      key: "a2",
-      color: "red",
-      icon: GraduationCap,
-    },
+    { key: "a1", color: "green", icon: BookOpen },
+    { key: "a2", color: "red", icon: GraduationCap },
+    { key: "b1", color: "green", icon: BookOpen },
+    { key: "b2", color: "red", icon: GraduationCap },
   ];
 
   return (
@@ -451,7 +444,7 @@ const CoursesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {courses.map((course) => {
             const courseData = t(`courses.${course.key}`);
             const isGreen = course.color === "green";
@@ -464,60 +457,47 @@ const CoursesSection = () => {
                 }`}
                 data-testid={`course-card-${course.key}`}
               >
-                <CardHeader className={`${isGreen ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white p-6`}>
-                  <div className="flex items-center gap-4">
-                    <course.icon className="h-10 w-10" />
+                <CardHeader className={`${isGreen ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white p-4`}>
+                  <div className="flex items-center gap-3">
+                    <course.icon className="h-8 w-8" />
                     <div>
-                      <CardTitle className="text-2xl font-bold heading-serif">{courseData.title}</CardTitle>
-                      <CardDescription className="text-white/80 body-sans">
-                        {isGreen ? "Bulgarca" : "Türkçe"} - {course.key.toUpperCase()}
+                      <CardTitle className="text-lg font-bold heading-serif">{courseData.title}</CardTitle>
+                      <CardDescription className="text-white/80 body-sans text-xs">
+                        Bulgarca - {course.key.toUpperCase()}
                       </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                      <Clock className={`h-5 w-5 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
-                      <div>
-                        <p className="text-xs text-[#52525B] body-sans">{t("courses.duration")}</p>
-                        <p className="font-semibold text-[#1A201C]">{courseData.duration}</p>
-                      </div>
+                <CardContent className="p-4">
+                  <div className="flex gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className={`h-4 w-4 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                      <span className="text-xs text-[#1A201C] font-medium">{courseData.duration}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Calendar className={`h-5 w-5 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
-                      <div>
-                        <p className="text-xs text-[#52525B] body-sans">{t("courses.weeklyHours")}</p>
-                        <p className="font-semibold text-[#1A201C]">{courseData.hours}</p>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className={`h-4 w-4 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                      <span className="text-xs text-[#1A201C] font-medium">{courseData.hours}</span>
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-[#1A201C] mb-3 heading-serif">{t("courses.whatYouLearn")}</h4>
-                    <ul className="space-y-2">
+                  <div>
+                    <h4 className="font-semibold text-[#1A201C] mb-2 heading-serif text-sm">{t("courses.whatYouLearn")}</h4>
+                    <ul className="space-y-1">
                       {courseData.features?.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-sm">
-                          <CheckCircle2 className={`h-4 w-4 mt-0.5 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                        <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-xs">
+                          <CheckCircle2 className={`h-3 w-3 mt-0.5 ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
                           {feature}
                         </li>
                       ))}
                     </ul>
                   </div>
-
-                  <div className={`p-4 rounded-xl ${isGreen ? "bg-[#E8F5E9]" : "bg-[#FDE8EB]"}`}>
-                    <p className="text-sm text-[#52525B] body-sans">{t("courses.price")}</p>
-                    <p className={`text-3xl font-bold heading-serif ${isGreen ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`}>
-                      {courseData.price}
-                    </p>
-                  </div>
                 </CardContent>
 
-                <CardFooter className="p-6 pt-0">
+                <CardFooter className="p-4 pt-0">
                   <Button 
                     asChild
-                    className={`w-full rounded-full py-6 text-lg font-semibold ${
+                    className={`w-full rounded-full py-4 text-sm font-semibold ${
                       isGreen 
                         ? "bg-[#1B5E3C] hover:bg-[#0D3321]" 
                         : "bg-[#C41E3A] hover:bg-[#A01830]"
@@ -526,7 +506,7 @@ const CoursesSection = () => {
                   >
                     <a href="#contact">
                       {t("courses.enrollNow")}
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </a>
                   </Button>
                 </CardFooter>
@@ -1738,7 +1718,6 @@ function App() {
           <CurriculumSection />
           <FlashcardsSection />
           <WhyUsSection />
-          <PricingSection />
           <LevelTestSection />
           <ContactSection />
         </main>

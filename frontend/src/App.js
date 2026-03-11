@@ -972,7 +972,7 @@ const FlashcardsSection = () => {
 const WhyUsSection = () => {
   const { t } = useLanguage();
 
-  const icons = [BookOpen, Users, MessageCircle, Award, Calendar, Monitor];
+  const icons = [BookOpen, Users, MessageCircle, Calendar, Monitor];
 
   return (
     <section 

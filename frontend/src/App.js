@@ -626,6 +626,101 @@ const CurriculumSection = () => {
         "Komut verme",
       ],
     },
+    b1: {
+      grammar: [
+        "İsimlerin cinsiyeti, sayısı ve belirli artikel tekrarı",
+        "Sıfatların cinsiyeti, sayısı ve derecelendirme tekrarı",
+        "Zarfların derecelendirmesi tekrarı",
+        "İyelik zamirlerinin tam formu (Пълна форма на притежателните местоимения)",
+        "Kısa dönüşlü iyelik zamiri (Кратко възвратно притежателно местоимение)",
+        "Şimdiki zaman tekrarı",
+        "Gelecek zaman tekrarı",
+        "Emir kipi tekrarı",
+        "Tamamlanmamış fiillerle gelecek zaman",
+        "Geçmiş sürekli zaman (Минало несвършено време)",
+        "Geçmiş belirli zaman tekrarı",
+        "Belirsiz geçmiş zaman tekrarı",
+        "Dönüşlü fiiller (Възвратни глаголи)",
+        "Kısa ismin -i ve -e halleri tekrarı",
+        "Belirsiz, olumsuz ve genelleyici zamirler",
+        "Bağlaçlar tekrarı",
+        "Geçmişte gelecek zaman (Бъдеще време в миналото)",
+        "Koşul yapıları (Условни конструкции)",
+        "Edilgen çatı (Страдателен залог)",
+        "Kelime türetme (Словообразуване)",
+        "Doğrudan ve dolaylı anlatım (Пряка и непряка реч)",
+      ],
+      skills: [
+        "İnsanları, nesneleri ve yerleri tarif etme",
+        "Favori ünlüler hakkında konuşma",
+        "Günlük yaşam hakkında konuşma",
+        "Gelecek planlar hakkında konuşma",
+        "Çocukluk hakkında konuşma",
+        "Geçmiş deneyimler hakkında konuşma",
+        "Arkadaşlar hakkında konuşma",
+        "Tatil planları hakkında konuşma",
+        "Yerleri tarif etme",
+        "Gerçekleşmemiş planlar hakkında konuşma",
+        "Anlaşma ve anlaşmazlık ifade etme",
+        "Kişisel görüş ifade etme",
+        "Çeşitli belge ve formları doldurma",
+        "Başkalarının sözlerini aktarma",
+        "Bulgaristan'ın coğrafyası ve tarihi hakkında konuşma",
+      ],
+    },
+    b2: {
+      grammar: [
+        "Bağlaçlar ve bağlaç kelimeleri (Съюзи и съюзни думи)",
+        "Birleşik cümleler (Сложни изречения)",
+        "Küçültme isimleri (Умалителни съществителни)",
+        "Şimdiki zaman etken ortaç (Сегашно деятелно причастие)",
+        "Geçmiş belirli etken ortaç (Минало свършено деятелно причастие)",
+        "Geçmiş edilgen ortaç (Минало страдателно причастие)",
+        "Emir kipi basit formlar",
+        "Emir kipi birleşik formlar",
+        "Edatlar (Предлози)",
+        "Nesne çiftlemesi (Удвояване на допълнението)",
+        "Dönüşlü fiiller",
+        "Dönüşlü iyelik zamiri kısa ve tam form",
+        "Dönüşlü edilgen çatı (Възвратно страдателен залог)",
+        "İsim türetme (Словообразуване на съществителни)",
+        "Belirsiz geçmiş zaman",
+        "Geçmiş mükemmel zaman (Минало предварително време)",
+        "Gelecek zaman",
+        "Geçmişte gelecek zaman",
+        "ТРЯБВА fiilinin kişili formları",
+        "Sıfat türetme (Словообразуване на прилагателните)",
+        "Geçmiş belirli zaman",
+        "Geçmiş sürekli zaman",
+        "Şimdiki ve geçmiş planda zaman uyumu",
+        "Koşul cümleleri (Условни изречения)",
+        "Koşul kipi (Условно наклонение)",
+        "Şimdiki tarihsel zaman",
+        "Fiil türetme (Словообразуване на глаголите)",
+      ],
+      skills: [
+        "Bulgaristan ve kendi ülkelerinin doğası hakkında konuşma",
+        "Tercihleri karşılaştırma ve gerekçelendirme",
+        "Geleneksel Bulgar mutfağı hakkında konuşma",
+        "Yemek hazırlama yöntemlerini karşılaştırma ve anlatma",
+        "Yemek tarifleri önerme",
+        "Farklı insan tiplerini karakter ve görünüş olarak tarif etme",
+        "İletişim kurdukları insanlar ve ilişkileri hakkında konuşma",
+        "Eğitim ve profesyonel deneyim hakkında konuşma",
+        "İş arkadaşlarıyla ilişkiler hakkında konuşma",
+        "Farklı iş yerlerini tarif etme ve karşılaştırma",
+        "İdeal işi ve beklentileri tanımlama",
+        "Arkadaşlarla çeşitli konularda sohbet etme",
+        "Farklı arkadaşları tarif etme ve karşılaştırma",
+        "Geçmişte planlanan ama gerçekleşmeyen olaylar hakkında konuşma",
+        "Politik, ekonomik ve kültürel olaylar hakkında konuşma",
+        "Güncel olayları tarif etme, karşılaştırma ve görüş bildirme",
+        "Tatil ve eğlenceler hakkında konuşma",
+        "Hayalleri ve gerçekleşmemiş hayalleri anlatma",
+        "Bulgaristan tarihi hakkında konuşma",
+        "Tarihi olayları tarif etme ve karşılaştırma",
+      ],
+    },
   };
 
   return (
@@ -648,10 +743,10 @@ const CurriculumSection = () => {
         </div>
 
         {/* Level Tabs */}
-        <div className="flex justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
           <button
             onClick={() => setActiveLevel("a1")}
-            className={`px-8 py-4 rounded-full font-semibold text-lg transition-all ${
+            className={`px-6 py-3 rounded-full font-semibold transition-all ${
               activeLevel === "a1"
                 ? "bg-[#1B5E3C] text-white shadow-lg"
                 : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#1B5E3C]"
@@ -662,7 +757,7 @@ const CurriculumSection = () => {
           </button>
           <button
             onClick={() => setActiveLevel("a2")}
-            className={`px-8 py-4 rounded-full font-semibold text-lg transition-all ${
+            className={`px-6 py-3 rounded-full font-semibold transition-all ${
               activeLevel === "a2"
                 ? "bg-[#C41E3A] text-white shadow-lg"
                 : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#C41E3A]"
@@ -671,13 +766,35 @@ const CurriculumSection = () => {
           >
             A2 - Temel
           </button>
+          <button
+            onClick={() => setActiveLevel("b1")}
+            className={`px-6 py-3 rounded-full font-semibold transition-all ${
+              activeLevel === "b1"
+                ? "bg-[#1B5E3C] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#1B5E3C]"
+            }`}
+            data-testid="curriculum-b1-tab"
+          >
+            B1 - Orta
+          </button>
+          <button
+            onClick={() => setActiveLevel("b2")}
+            className={`px-6 py-3 rounded-full font-semibold transition-all ${
+              activeLevel === "b2"
+                ? "bg-[#C41E3A] text-white shadow-lg"
+                : "bg-white text-[#1A201C] border-2 border-[#E4E4E7] hover:border-[#C41E3A]"
+            }`}
+            data-testid="curriculum-b2-tab"
+          >
+            B2 - İleri
+          </button>
         </div>
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Grammar */}
           <Card className="border-2 border-[#E4E4E7]">
-            <CardHeader className={`${activeLevel === "a1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
+            <CardHeader className={`${activeLevel === "a1" || activeLevel === "b1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
               <CardTitle className="flex items-center gap-3 text-xl">
                 <BookOpen className="h-6 w-6" />
                 {grammarTitle[lang]}
@@ -687,7 +804,7 @@ const CurriculumSection = () => {
               <ul className="space-y-2">
                 {curriculum[activeLevel].grammar.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-sm">
-                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" || activeLevel === "b1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
                     {item}
                   </li>
                 ))}
@@ -697,7 +814,7 @@ const CurriculumSection = () => {
 
           {/* Skills */}
           <Card className="border-2 border-[#E4E4E7]">
-            <CardHeader className={`${activeLevel === "a1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
+            <CardHeader className={`${activeLevel === "a1" || activeLevel === "b1" ? "bg-[#1B5E3C]" : "bg-[#C41E3A]"} text-white rounded-t-lg`}>
               <CardTitle className="flex items-center gap-3 text-xl">
                 <MessageCircle className="h-6 w-6" />
                 {skillsTitle[lang]}
@@ -707,7 +824,7 @@ const CurriculumSection = () => {
               <ul className="space-y-2">
                 {curriculum[activeLevel].skills.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-[#52525B] body-sans text-sm">
-                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
+                    <CheckCircle2 className={`h-4 w-4 mt-0.5 flex-shrink-0 ${activeLevel === "a1" || activeLevel === "b1" ? "text-[#1B5E3C]" : "text-[#C41E3A]"}`} />
                     {item}
                   </li>
                 ))}

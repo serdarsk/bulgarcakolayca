@@ -1095,23 +1095,26 @@ const PricingSection = () => {
   );
 };
 
-// Level Test Section
+// Level Test Section - Adaptive System
 const LevelTestSection = () => {
   const { t, lang } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [step, setStep] = useState(0); // 0: form, 1+: questions
+  const [phase, setPhase] = useState("form"); // form, testing, result
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
+  const [allQuestions, setAllQuestions] = useState({});
+  const [currentLevel, setCurrentLevel] = useState("A1");
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [levelAnswers, setLevelAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [levels] = useState(["A1", "A2", "B1", "B2", "C1"]);
 
-  const fetchQuestions = async (language) => {
+  const fetchAllQuestions = async (language) => {
     try {
-      const response = await axios.get(`${API}/quiz/questions/${language}`);
-      setQuestions(response.data.questions);
+      const response = await axios.get(`${API}/quiz/all-questions/${language}`);
+      setAllQuestions(response.data.questions);
     } catch (error) {
       console.error("Error fetching questions:", error);
       toast.error(t("common.error"));
@@ -1120,29 +1123,57 @@ const LevelTestSection = () => {
 
   const handleStartTest = () => {
     if (!name || !email || !selectedLanguage) {
-      toast.error("Lütfen tüm alanları doldurun / Please fill all fields");
+      toast.error("Lütfen tüm alanları doldurun");
       return;
     }
-    fetchQuestions(selectedLanguage);
-    setStep(1);
+    fetchAllQuestions(selectedLanguage);
+    setCurrentLevel("A1");
+    setCurrentQuestionIndex(0);
+    setLevelAnswers({});
+    setPhase("testing");
   };
 
-  const handleSubmit = async () => {
+  const getCurrentQuestions = () => allQuestions[currentLevel] || [];
+  const currentQuestion = getCurrentQuestions()[currentQuestionIndex];
+
+  const handleAnswer = (optionIndex) => {
+    const qId = currentQuestion.id;
+    const newLevelAnswers = {
+      ...levelAnswers,
+      [currentLevel]: [
+        ...(levelAnswers[currentLevel] || []),
+        { question_id: qId, selected_option: optionIndex }
+      ]
+    };
+    setLevelAnswers(newLevelAnswers);
+
+    const questions = getCurrentQuestions();
+    if (currentQuestionIndex + 1 < questions.length) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // Level completed - check if should move to next level
+      const levelIndex = levels.indexOf(currentLevel);
+      if (levelIndex + 1 < levels.length && allQuestions[levels[levelIndex + 1]]) {
+        setCurrentLevel(levels[levelIndex + 1]);
+        setCurrentQuestionIndex(0);
+      } else {
+        // All levels completed - submit with updated answers
+        handleSubmitWithAnswers(newLevelAnswers);
+      }
+    }
+  };
+
+  const handleSubmitWithAnswers = async (answers) => {
     setIsLoading(true);
     try {
-      const answersArray = Object.entries(answers).map(([qId, opt]) => ({
-        question_id: parseInt(qId),
-        selected_option: opt,
-      }));
-
-      const response = await axios.post(`${API}/quiz/submit`, {
+      const response = await axios.post(`${API}/quiz/submit-adaptive`, {
         name,
         email,
         language_learning: selectedLanguage,
-        answers: answersArray,
+        level_answers: answers,
       });
-
       setResult(response.data);
+      setPhase("result");
     } catch (error) {
       console.error("Error submitting quiz:", error);
       toast.error(t("common.error"));
@@ -1152,17 +1183,39 @@ const LevelTestSection = () => {
   };
 
   const resetQuiz = () => {
-    setStep(0);
+    setPhase("form");
     setSelectedLanguage("");
     setName("");
     setEmail("");
-    setQuestions([]);
-    setAnswers({});
+    setAllQuestions({});
+    setCurrentLevel("A1");
+    setCurrentQuestionIndex(0);
+    setLevelAnswers({});
     setResult(null);
   };
 
-  const currentQuestion = questions[step - 1];
-  const progress = questions.length > 0 ? (step / questions.length) * 100 : 0;
+  // Calculate progress
+  const getTotalProgress = () => {
+    let totalAnswered = 0;
+    let totalQuestions = 0;
+    
+    levels.forEach(level => {
+      if (allQuestions[level]) {
+        totalQuestions += allQuestions[level].length;
+        if (levelAnswers[level]) {
+          totalAnswered += levelAnswers[level].length;
+        }
+      }
+    });
+    
+    return totalQuestions > 0 ? (totalAnswered / totalQuestions) * 100 : 0;
+  };
+
+  const levelLabels = {
+    tr: { A1: "A1 - Başlangıç", A2: "A2 - Temel", B1: "B1 - Orta", B2: "B2 - İleri", C1: "C1 - İleri Üst" },
+    en: { A1: "A1 - Beginner", A2: "A2 - Elementary", B1: "B1 - Intermediate", B2: "B2 - Upper Intermediate", C1: "C1 - Advanced" },
+    bg: { A1: "A1 - Начинаещ", A2: "A2 - Елементарен", B1: "B1 - Среден", B2: "B2 - Напреднал", C1: "C1 - Професионален" },
+  };
 
   return (
     <section 
@@ -1205,37 +1258,93 @@ const LevelTestSection = () => {
 
       {/* Quiz Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-xl" data-testid="quiz-modal">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="quiz-modal">
           <DialogHeader>
             <DialogTitle className="heading-serif text-2xl">
-              {result ? t("levelTest.result") : t("levelTest.sectionTitle")}
+              {phase === "result" ? t("levelTest.result") : t("levelTest.sectionTitle")}
             </DialogTitle>
             <DialogDescription className="body-sans">
-              {!result && step === 0 && t("levelTest.selectLanguage")}
-              {!result && step > 0 && `${t("levelTest.question")} ${step}${t("levelTest.of")}${questions.length}`}
+              {phase === "form" && t("levelTest.selectLanguage")}
+              {phase === "testing" && (
+                <span className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${currentLevel === "A1" || currentLevel === "B1" ? "bg-[#1B5E3C] text-white" : "bg-[#C41E3A] text-white"}`}>
+                    {currentLevel}
+                  </span>
+                  <span>{levelLabels[lang]?.[currentLevel] || currentLevel}</span>
+                  <span className="text-[#52525B]">• Soru {currentQuestionIndex + 1}/{getCurrentQuestions().length}</span>
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 
-          {/* Result */}
-          {result ? (
-            <div className="text-center py-6">
-              <div className="w-24 h-24 mx-auto mb-6 bg-[#E8F5E9] rounded-full flex items-center justify-center">
-                <Award className="h-12 w-12 text-[#1B5E3C]" />
+          {/* Result Screen */}
+          {phase === "result" && result ? (
+            <div className="py-4">
+              {/* Summary Card */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 mx-auto mb-4 bg-[#E8F5E9] rounded-full flex items-center justify-center">
+                  <Award className="h-10 w-10 text-[#1B5E3C]" />
+                </div>
+                <h3 className="text-3xl font-bold text-[#1B5E3C] heading-serif">
+                  {result.total_score}/{result.total_questions}
+                </h3>
+                <p className="text-[#52525B] body-sans">%{result.overall_percentage} Başarı</p>
               </div>
-              <h3 className="text-4xl font-bold text-[#1B5E3C] mb-2 heading-serif">
-                {result.score}/{result.total_questions}
-              </h3>
-              <p className="text-[#52525B] mb-4 body-sans">
-                {t("levelTest.score")}: {result.percentage.toFixed(0)}%
-              </p>
-              <div className="p-4 bg-[#F9F9F7] rounded-xl mb-6">
-                <p className="text-sm text-[#52525B] body-sans">{t("levelTest.recommendedLevel")}</p>
-                <p className="text-2xl font-bold text-[#C41E3A] heading-serif">{result.recommended_level}</p>
+
+              {/* Recommended Level */}
+              <div className="p-4 bg-gradient-to-r from-[#1B5E3C] to-[#2D8B5E] rounded-xl mb-6 text-center text-white">
+                <p className="text-sm opacity-80">{t("levelTest.recommendedLevel")}</p>
+                <p className="text-3xl font-bold heading-serif">{result.recommended_level}</p>
               </div>
+
+              {/* Level Breakdown */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-[#1A201C] mb-3 heading-serif">Seviye Detayları</h4>
+                <div className="space-y-3">
+                  {result.level_scores?.map((score, i) => (
+                    <div 
+                      key={i} 
+                      className={`p-3 rounded-lg border ${score.passed ? "bg-[#E8F5E9] border-[#1B5E3C]" : "bg-[#FDE8EB] border-[#C41E3A]"}`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${score.passed ? "bg-[#1B5E3C] text-white" : "bg-[#C41E3A] text-white"}`}>
+                            {score.level}
+                          </span>
+                          <span className="font-medium">{levelLabels[lang]?.[score.level] || score.level}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm body-sans">
+                            {score.correct}/{score.total} (%{score.percentage})
+                          </span>
+                          {score.passed ? (
+                            <CheckCircle2 className="h-5 w-5 text-[#1B5E3C]" />
+                          ) : (
+                            <X className="h-5 w-5 text-[#C41E3A]" />
+                          )}
+                        </div>
+                      </div>
+                      <Progress 
+                        value={score.percentage} 
+                        className={`h-2 mt-2 ${score.passed ? "[&>div]:bg-[#1B5E3C]" : "[&>div]:bg-[#C41E3A]"}`} 
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Highest Passed */}
+              {result.highest_passed_level && result.highest_passed_level !== "Yok" && (
+                <div className="p-3 bg-[#F9F9F7] rounded-lg mb-6 text-center">
+                  <p className="text-sm text-[#52525B]">En Yüksek Geçilen Seviye</p>
+                  <p className="text-xl font-bold text-[#1B5E3C] heading-serif">{result.highest_passed_level}</p>
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <Button
                   variant="outline"
-                  onClick={() => { resetQuiz(); }}
+                  onClick={resetQuiz}
                   className="flex-1 rounded-full"
                   data-testid="start-over-btn"
                 >
@@ -1250,7 +1359,7 @@ const LevelTestSection = () => {
                 </Button>
               </div>
             </div>
-          ) : step === 0 ? (
+          ) : phase === "form" ? (
             /* Initial Form */
             <div className="space-y-4 py-4">
               <div>
@@ -1293,6 +1402,18 @@ const LevelTestSection = () => {
                   </div>
                 </RadioGroup>
               </div>
+
+              {/* Test Info */}
+              <div className="p-4 bg-[#F9F9F7] rounded-xl mt-4">
+                <h4 className="font-semibold text-[#1A201C] mb-2">Test Hakkında</h4>
+                <ul className="text-sm text-[#52525B] space-y-1">
+                  <li>• A1'den C1'e kadar 5 seviye</li>
+                  <li>• Her seviyede 5-6 soru</li>
+                  <li>• %67 başarı ile üst seviyeye geçiş</li>
+                  <li>• Toplam yaklaşık 25-27 soru</li>
+                </ul>
+              </div>
+
               <Button
                 onClick={handleStartTest}
                 className="w-full bg-[#C41E3A] hover:bg-[#A01830] rounded-full mt-4"
@@ -1303,71 +1424,74 @@ const LevelTestSection = () => {
               </Button>
             </div>
           ) : (
-            /* Questions */
+            /* Questions - Testing Phase */
             <div className="py-4">
-              <Progress value={progress} className="mb-6 h-2" />
-              
-              {currentQuestion && (
+              {/* Overall Progress */}
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-[#52525B] mb-1">
+                  <span>Genel İlerleme</span>
+                  <span>%{Math.round(getTotalProgress())}</span>
+                </div>
+                <Progress value={getTotalProgress()} className="h-2" />
+              </div>
+
+              {/* Level Progress Dots */}
+              <div className="flex justify-center gap-2 mb-6">
+                {levels.map((level, i) => {
+                  const hasQuestions = allQuestions[level];
+                  const isActive = level === currentLevel;
+                  const isPassed = levelAnswers[level]?.length === allQuestions[level]?.length;
+                  
+                  if (!hasQuestions) return null;
+                  
+                  return (
+                    <div 
+                      key={level}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                        isActive 
+                          ? "bg-[#1B5E3C] text-white scale-110" 
+                          : isPassed 
+                            ? "bg-[#E8F5E9] text-[#1B5E3C] border-2 border-[#1B5E3C]" 
+                            : "bg-[#E4E4E7] text-[#52525B]"
+                      }`}
+                    >
+                      {level}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {currentQuestion && !isLoading && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-[#1A201C] heading-serif">
                     {currentQuestion.question}
                   </h3>
-                  {currentQuestion.translation && currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "en"] && (
+                  {currentQuestion.translation && currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "tr"] && (
                     <p className="text-sm text-[#52525B] italic body-sans">
-                      ({currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "en"]})
+                      ({currentQuestion.translation[lang === "bg" ? "en" : lang === "en" ? "tr" : "tr"]})
                     </p>
                   )}
                   
-                  <RadioGroup
-                    value={answers[currentQuestion.id]?.toString() || ""}
-                    onValueChange={(value) => setAnswers({ ...answers, [currentQuestion.id]: parseInt(value) })}
-                  >
-                    <div className="space-y-2">
-                      {currentQuestion.options.map((option, i) => (
-                        <div 
-                          key={i} 
-                          className="flex items-center space-x-3 p-3 rounded-lg border border-[#E4E4E7] hover:border-[#1B5E3C] transition-colors"
-                        >
-                          <RadioGroupItem value={i.toString()} id={`option-${i}`} data-testid={`option-${i}`} />
-                          <Label htmlFor={`option-${i}`} className="cursor-pointer body-sans flex-1">
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-
-                  <div className="flex gap-4 mt-6">
-                    {step > 1 && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setStep(step - 1)}
-                        className="flex-1 rounded-full"
-                        data-testid="prev-btn"
+                  <div className="space-y-2">
+                    {currentQuestion.options.map((option, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleAnswer(i)}
+                        className="w-full text-left p-4 rounded-lg border border-[#E4E4E7] hover:border-[#1B5E3C] hover:bg-[#E8F5E9] transition-all body-sans"
+                        data-testid={`option-${i}`}
                       >
-                        {t("levelTest.previous")}
-                      </Button>
-                    )}
-                    {step < questions.length ? (
-                      <Button
-                        onClick={() => setStep(step + 1)}
-                        disabled={answers[currentQuestion.id] === undefined}
-                        className="flex-1 bg-[#1B5E3C] hover:bg-[#0D3321] rounded-full"
-                        data-testid="next-btn"
-                      >
-                        {t("levelTest.next")}
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={isLoading || answers[currentQuestion.id] === undefined}
-                        className="flex-1 bg-[#C41E3A] hover:bg-[#A01830] rounded-full"
-                        data-testid="submit-quiz-btn"
-                      >
-                        {isLoading ? t("common.loading") : t("levelTest.submit")}
-                      </Button>
-                    )}
+                        <span className="font-semibold mr-2">{String.fromCharCode(65 + i)})</span>
+                        {option}
+                      </button>
+                    ))}
                   </div>
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1B5E3C] mx-auto mb-4"></div>
+                  <p className="text-[#52525B]">Sonuçlar hesaplanıyor...</p>
                 </div>
               )}
             </div>

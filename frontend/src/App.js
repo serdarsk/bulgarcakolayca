@@ -380,7 +380,7 @@ const AboutSection = () => {
                 {t("about.credentials")}
               </h3>
               <div className="flex flex-wrap gap-3">
-                {[t("about.credential1"), t("about.credential2")].map((cred, i) => (
+                {[t("about.credential1")].map((cred, i) => (
                   <span 
                     key={i}
                     className="credential-badge inline-flex items-center gap-2 px-4 py-2 bg-[#E8F5E9] text-[#1B5E3C] rounded-full text-sm font-medium"

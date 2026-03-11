@@ -242,14 +242,14 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Stats Ribbon */}
-        <StatsRibbon />
+        {/* Stats Ribbon removed */}
       </div>
     </section>
   );
 };
 
-// Stats Ribbon Component
+// Stats Ribbon Component - Disabled
+/*
 const StatsRibbon = () => {
   const { lang } = useLanguage();
   const stats = [
@@ -275,6 +275,7 @@ const StatsRibbon = () => {
     </div>
   );
 };
+*/
 
 // Who Is This For Section
 const WhoIsThisForSection = () => {

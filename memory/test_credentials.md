@@ -1,8 +1,9 @@
 # Test Credentials for BulgarcaKolayca
 
 ## Teacher Account
-- **Email:** teacher@bulgarcakolayca.com
-- **Password:** teacher123
+- **Email:** bulgarcakolayca@gmail.com
+- **Password:** Fatma123
+- **Name:** Fatma Uslu Özşeker
 - **Role:** teacher
 - **Access:** Full admin panel at /panel/teacher
 
@@ -16,3 +17,5 @@ To test student flow:
 - Login: POST /api/auth/login
 - Register: POST /api/auth/register
 - Init Teacher: POST /api/init-teacher (one-time setup)
+- Change Password: PUT /api/auth/change-password
+- Update Profile: PUT /api/auth/profile

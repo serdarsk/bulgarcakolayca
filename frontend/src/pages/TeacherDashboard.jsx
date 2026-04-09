@@ -17,7 +17,7 @@ import { tr } from "date-fns/locale";
 import { 
   LogOut, Users, Calendar as CalendarIcon, FileText, Bell, 
   Plus, Check, X, Trash2, Edit, Video, Clock, User,
-  BookOpen, CheckCircle2, AlertCircle, ChevronRight
+  BookOpen, CheckCircle2, AlertCircle, ChevronRight, Settings, Key
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -42,6 +42,7 @@ export default function TeacherDashboard() {
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   
   // Form states
   const [lessonForm, setLessonForm] = useState({
@@ -56,6 +57,9 @@ export default function TeacherDashboard() {
   });
   const [studentForm, setStudentForm] = useState({
     name: "", email: "", password: ""
+  });
+  const [settingsForm, setSettingsForm] = useState({
+    name: "", email: "", currentPassword: "", newPassword: "", confirmPassword: ""
   });
 
   useEffect(() => {
@@ -208,6 +212,60 @@ export default function TeacherDashboard() {
     }
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (settingsForm.newPassword !== settingsForm.confirmPassword) {
+      toast.error("Yeni şifreler eşleşmiyor");
+      return;
+    }
+    if (settingsForm.newPassword.length < 6) {
+      toast.error("Şifre en az 6 karakter olmalı");
+      return;
+    }
+    try {
+      await axios.put(`${API}/auth/change-password`, {
+        current_password: settingsForm.currentPassword,
+        new_password: settingsForm.newPassword
+      }, getAuthHeader());
+      toast.success("Şifre başarıyla değiştirildi");
+      setSettingsForm({ ...settingsForm, currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Şifre değiştirilemedi");
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    const updateData = {};
+    if (settingsForm.name && settingsForm.name !== user?.name) updateData.name = settingsForm.name;
+    if (settingsForm.email && settingsForm.email !== user?.email) updateData.email = settingsForm.email;
+    
+    if (Object.keys(updateData).length === 0) {
+      toast.info("Değişiklik yok");
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/auth/profile`, updateData, getAuthHeader());
+      toast.success("Profil güncellendi. Yeniden giriş yapın.");
+      logout();
+      navigate("/panel/login");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Profil güncellenemedi");
+    }
+  };
+
+  const openSettingsModal = () => {
+    setSettingsForm({
+      name: user?.name || "",
+      email: user?.email || "",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+    setShowSettingsModal(true);
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/panel/login");
@@ -241,15 +299,26 @@ export default function TeacherDashboard() {
                 <p className="text-xs text-[#52525B]">{user?.name}</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleLogout}
-              className="border-[#C41E3A] text-[#C41E3A] hover:bg-[#C41E3A] hover:text-white"
-              data-testid="logout-btn"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Çıkış
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={openSettingsModal}
+                className="border-[#1B5E3C] text-[#1B5E3C] hover:bg-[#1B5E3C] hover:text-white"
+                data-testid="settings-btn"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Ayarlar
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="border-[#C41E3A] text-[#C41E3A] hover:bg-[#C41E3A] hover:text-white"
+                data-testid="logout-btn"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Çıkış
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -916,6 +985,89 @@ export default function TeacherDashboard() {
               <Button type="button" variant="outline" onClick={() => setShowStudentModal(false)}>İptal</Button>
               <Button type="submit" className="bg-[#1B5E3C] hover:bg-[#0D3321]">Ekle</Button>
             </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Modal */}
+      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Hesap Ayarları
+            </DialogTitle>
+            <DialogDescription>Profil ve şifre ayarlarınızı yönetin</DialogDescription>
+          </DialogHeader>
+          
+          {/* Profile Update */}
+          <form onSubmit={handleUpdateProfile} className="space-y-4 border-b pb-6">
+            <h3 className="font-semibold text-[#1A201C] flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Profil Bilgileri
+            </h3>
+            <div>
+              <Label>Ad Soyad</Label>
+              <Input
+                value={settingsForm.name}
+                onChange={(e) => setSettingsForm({...settingsForm, name: e.target.value})}
+                placeholder="Ad Soyad"
+              />
+            </div>
+            <div>
+              <Label>E-posta</Label>
+              <Input
+                type="email"
+                value={settingsForm.email}
+                onChange={(e) => setSettingsForm({...settingsForm, email: e.target.value})}
+                placeholder="E-posta"
+              />
+            </div>
+            <Button type="submit" className="bg-[#1B5E3C] hover:bg-[#0D3321]">
+              Profili Güncelle
+            </Button>
+          </form>
+
+          {/* Password Change */}
+          <form onSubmit={handleChangePassword} className="space-y-4 pt-4">
+            <h3 className="font-semibold text-[#1A201C] flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              Şifre Değiştir
+            </h3>
+            <div>
+              <Label>Mevcut Şifre</Label>
+              <Input
+                type="password"
+                value={settingsForm.currentPassword}
+                onChange={(e) => setSettingsForm({...settingsForm, currentPassword: e.target.value})}
+                placeholder="Mevcut şifreniz"
+                required
+              />
+            </div>
+            <div>
+              <Label>Yeni Şifre</Label>
+              <Input
+                type="password"
+                value={settingsForm.newPassword}
+                onChange={(e) => setSettingsForm({...settingsForm, newPassword: e.target.value})}
+                placeholder="En az 6 karakter"
+                required
+                minLength={6}
+              />
+            </div>
+            <div>
+              <Label>Yeni Şifre (Tekrar)</Label>
+              <Input
+                type="password"
+                value={settingsForm.confirmPassword}
+                onChange={(e) => setSettingsForm({...settingsForm, confirmPassword: e.target.value})}
+                placeholder="Yeni şifreyi tekrar girin"
+                required
+              />
+            </div>
+            <Button type="submit" className="bg-[#C41E3A] hover:bg-[#A01830]">
+              Şifreyi Değiştir
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

@@ -958,6 +958,60 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         "approved": current_user.get("approved", True)
     }
 
+# ==================== PROFILE UPDATE ====================
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=6)
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
+    email: Optional[EmailStr] = None
+
+@api_router.put("/auth/change-password")
+async def change_password(data: PasswordChange, current_user: dict = Depends(get_current_user)):
+    """Change user password"""
+    # Verify current password
+    user = await db.users.find_one({"id": current_user["id"]})
+    if not verify_password(data.current_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Mevcut şifre yanlış")
+    
+    # Update password
+    new_hash = hash_password(data.new_password)
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"password": new_hash}}
+    )
+    return {"message": "Şifre başarıyla değiştirildi"}
+
+@api_router.put("/auth/profile")
+async def update_profile(data: ProfileUpdate, current_user: dict = Depends(get_current_user)):
+    """Update user profile (name, email)"""
+    update_data = {}
+    
+    if data.name:
+        update_data["name"] = data.name
+    
+    if data.email and data.email != current_user["email"]:
+        # Check if email already exists
+        existing = await db.users.find_one({"email": data.email})
+        if existing:
+            raise HTTPException(status_code=400, detail="Bu email zaten kullanılıyor")
+        update_data["email"] = data.email
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Güncellenecek veri yok")
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": update_data}
+    )
+    
+    # Return updated user
+    updated_user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "password": 0})
+    return updated_user
+
+
 # ==================== TEACHER: STUDENT MANAGEMENT ====================
 
 @api_router.get("/teacher/students")
@@ -1347,8 +1401,8 @@ async def init_teacher():
     
     teacher_doc = {
         "id": str(uuid.uuid4()),
-        "email": "teacher@bulgarcakolayca.com",
-        "password": hash_password("teacher123"),
+        "email": "bulgarcakolayca@gmail.com",
+        "password": hash_password("Fatma123"),
         "name": "Fatma Uslu Özşeker",
         "role": "teacher",
         "approved": True,

@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,10 +9,20 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import hashlib
+import secrets
+import jwt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# JWT Settings
+JWT_SECRET = os.environ.get('JWT_SECRET', 'bulgarcakolayca-secret-key-2024')
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
+
+security = HTTPBearer()
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -24,15 +35,149 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Define Models
+# ==================== AUTH HELPERS ====================
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(password: str, hashed: str) -> bool:
+    return hash_password(password) == hashed
+
+def create_token(user_id: str, role: str) -> str:
+    payload = {
+        "user_id": user_id,
+        "role": role,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    payload = decode_token(token)
+    user = await db.users.find_one({"id": payload["user_id"]}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+async def require_teacher(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "teacher":
+        raise HTTPException(status_code=403, detail="Teacher access required")
+    return current_user
+
+async def require_approved_student(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") == "teacher":
+        return current_user
+    if current_user.get("role") == "student" and current_user.get("approved"):
+        return current_user
+    raise HTTPException(status_code=403, detail="Approved student or teacher access required")
+
+# ==================== USER MODELS ====================
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    name: str = Field(..., min_length=2, max_length=100)
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: str
+    approved: bool
+    created_at: str
+
+class StudentApprove(BaseModel):
+    student_id: str
+    approved: bool
+
+class StudentCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    name: str = Field(..., min_length=2, max_length=100)
+
+# ==================== LESSON MODELS ====================
+
+class LessonCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    date: str  # YYYY-MM-DD
+    start_time: str  # HH:MM
+    end_time: str  # HH:MM
+    lesson_type: str = "individual"  # individual or group
+    student_ids: List[str] = []  # for individual or group assignment
+    max_students: Optional[int] = 1  # for group lessons
+    recurring: bool = False
+    recurring_weeks: Optional[int] = 0
+    zoom_link: Optional[str] = ""  # Zoom/meeting link
+    level: Optional[str] = "A1"  # A1, A2, B1, B2
+
+class LessonUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    student_ids: Optional[List[str]] = None
+    status: Optional[str] = None
+    zoom_link: Optional[str] = None
+    level: Optional[str] = None
+
+class RescheduleRequest(BaseModel):
+    lesson_id: str
+    requested_date: str
+    requested_start_time: str
+    requested_end_time: str
+    reason: str
+
+class RescheduleResponse(BaseModel):
+    request_id: str
+    approved: bool
+    message: Optional[str] = ""
+
+# ==================== MATERIAL MODELS ====================
+
+class MaterialCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    link: str
+    file_type: str = "document"  # document, video, audio, other
+    visible_to: List[str] = []  # student IDs, empty = all students
+
+class MaterialUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    link: Optional[str] = None
+    visible_to: Optional[List[str]] = None
+
+# ==================== NOTIFICATION MODELS ====================
+
+class NotificationCreate(BaseModel):
+    user_id: str
+    title: str
+    message: str
+    type: str = "info"  # info, warning, success, lesson, reschedule
+
+# Status Check Models
+class StatusCheckCreate(BaseModel):
+    client_name: str
+
 class StatusCheck(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
 
 # Contact Form Models
 class ContactFormCreate(BaseModel):
@@ -741,6 +886,476 @@ async def get_quiz_questions(language: str):
 async def get_level_test_results():
     results = await db.level_tests.find({}, {"_id": 0}).to_list(1000)
     return results
+
+# ==================== AUTH ENDPOINTS ====================
+
+@api_router.post("/auth/register")
+async def register_student(user: UserCreate):
+    """Register a new student (requires approval)"""
+    existing = await db.users.find_one({"email": user.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    user_doc = {
+        "id": str(uuid.uuid4()),
+        "email": user.email,
+        "password": hash_password(user.password),
+        "name": user.name,
+        "role": "student",
+        "approved": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(user_doc)
+    
+    # Create notification for teacher
+    teacher = await db.users.find_one({"role": "teacher"})
+    if teacher:
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": teacher["id"],
+            "title": "Yeni Öğrenci Kaydı",
+            "message": f"{user.name} ({user.email}) kayıt oldu ve onay bekliyor.",
+            "type": "info",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    return {"message": "Registration successful. Waiting for teacher approval.", "user_id": user_doc["id"]}
+
+@api_router.post("/auth/login")
+async def login(credentials: UserLogin):
+    """Login for both teachers and students"""
+    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(credentials.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if user["role"] == "student" and not user.get("approved"):
+        raise HTTPException(status_code=403, detail="Account pending approval")
+    
+    token = create_token(user["id"], user["role"])
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "role": user["role"]
+        }
+    }
+
+@api_router.get("/auth/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    """Get current user info"""
+    return {
+        "id": current_user["id"],
+        "email": current_user["email"],
+        "name": current_user["name"],
+        "role": current_user["role"],
+        "approved": current_user.get("approved", True)
+    }
+
+# ==================== TEACHER: STUDENT MANAGEMENT ====================
+
+@api_router.get("/teacher/students")
+async def get_students(current_user: dict = Depends(require_teacher)):
+    """Get all students"""
+    students = await db.users.find({"role": "student"}, {"_id": 0, "password": 0}).to_list(1000)
+    return students
+
+@api_router.get("/teacher/pending-students")
+async def get_pending_students(current_user: dict = Depends(require_teacher)):
+    """Get students waiting for approval"""
+    students = await db.users.find({"role": "student", "approved": False}, {"_id": 0, "password": 0}).to_list(1000)
+    return students
+
+@api_router.post("/teacher/approve-student")
+async def approve_student(data: StudentApprove, current_user: dict = Depends(require_teacher)):
+    """Approve or reject a student"""
+    result = await db.users.update_one(
+        {"id": data.student_id, "role": "student"},
+        {"$set": {"approved": data.approved}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # Notify student
+    student = await db.users.find_one({"id": data.student_id})
+    if student:
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": data.student_id,
+            "title": "Hesap Durumu",
+            "message": "Hesabınız onaylandı! Artık giriş yapabilirsiniz." if data.approved else "Hesabınız reddedildi.",
+            "type": "success" if data.approved else "warning",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    return {"message": "Student approved" if data.approved else "Student rejected"}
+
+@api_router.post("/teacher/add-student")
+async def add_student_manually(student: StudentCreate, current_user: dict = Depends(require_teacher)):
+    """Teacher adds a student manually (auto-approved)"""
+    existing = await db.users.find_one({"email": student.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    user_doc = {
+        "id": str(uuid.uuid4()),
+        "email": student.email,
+        "password": hash_password(student.password),
+        "name": student.name,
+        "role": "student",
+        "approved": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(user_doc)
+    return {"message": "Student added successfully", "user_id": user_doc["id"]}
+
+@api_router.delete("/teacher/student/{student_id}")
+async def delete_student(student_id: str, current_user: dict = Depends(require_teacher)):
+    """Delete a student"""
+    result = await db.users.delete_one({"id": student_id, "role": "student"})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return {"message": "Student deleted"}
+
+# ==================== LESSONS ====================
+
+@api_router.post("/lessons")
+async def create_lesson(lesson: LessonCreate, current_user: dict = Depends(require_teacher)):
+    """Create a new lesson"""
+    lesson_doc = {
+        "id": str(uuid.uuid4()),
+        "title": lesson.title,
+        "description": lesson.description,
+        "date": lesson.date,
+        "start_time": lesson.start_time,
+        "end_time": lesson.end_time,
+        "lesson_type": lesson.lesson_type,
+        "student_ids": lesson.student_ids,
+        "max_students": lesson.max_students if lesson.lesson_type == "group" else 1,
+        "zoom_link": lesson.zoom_link or "",
+        "level": lesson.level or "A1",
+        "status": "scheduled",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.lessons.insert_one(lesson_doc)
+    
+    # Notify students
+    for student_id in lesson.student_ids:
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": student_id,
+            "title": "Yeni Ders",
+            "message": f"{lesson.date} tarihinde {lesson.start_time} - {lesson.end_time} saatleri arasında '{lesson.title}' dersiniz eklendi.",
+            "type": "lesson",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    # Handle recurring lessons
+    if lesson.recurring and lesson.recurring_weeks > 0:
+        base_date = datetime.strptime(lesson.date, "%Y-%m-%d")
+        for week in range(1, lesson.recurring_weeks + 1):
+            new_date = base_date + timedelta(weeks=week)
+            recurring_lesson = lesson_doc.copy()
+            recurring_lesson["id"] = str(uuid.uuid4())
+            recurring_lesson["date"] = new_date.strftime("%Y-%m-%d")
+            await db.lessons.insert_one(recurring_lesson)
+    
+    return {"message": "Lesson created", "lesson_id": lesson_doc["id"]}
+
+@api_router.get("/lessons")
+async def get_lessons(current_user: dict = Depends(require_approved_student)):
+    """Get lessons - teachers see all, students see their own"""
+    if current_user["role"] == "teacher":
+        lessons = await db.lessons.find({}, {"_id": 0}).to_list(1000)
+    else:
+        lessons = await db.lessons.find(
+            {"student_ids": current_user["id"]}, 
+            {"_id": 0}
+        ).to_list(1000)
+    
+    # Add student names to lessons
+    for lesson in lessons:
+        student_names = []
+        for sid in lesson.get("student_ids", []):
+            student = await db.users.find_one({"id": sid}, {"name": 1})
+            if student:
+                student_names.append(student["name"])
+        lesson["student_names"] = student_names
+    
+    return lessons
+
+@api_router.put("/lessons/{lesson_id}")
+async def update_lesson(lesson_id: str, update: LessonUpdate, current_user: dict = Depends(require_teacher)):
+    """Update a lesson"""
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No update data")
+    
+    result = await db.lessons.update_one({"id": lesson_id}, {"$set": update_data})
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Notify students if date/time changed
+    if update.date or update.start_time or update.end_time:
+        lesson = await db.lessons.find_one({"id": lesson_id})
+        if lesson:
+            for student_id in lesson.get("student_ids", []):
+                notif = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": student_id,
+                    "title": "Ders Güncellendi",
+                    "message": f"'{lesson['title']}' dersiniz güncellendi. Yeni tarih/saat: {lesson['date']} {lesson['start_time']}",
+                    "type": "lesson",
+                    "read": False,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.notifications.insert_one(notif)
+    
+    return {"message": "Lesson updated"}
+
+@api_router.delete("/lessons/{lesson_id}")
+async def delete_lesson(lesson_id: str, current_user: dict = Depends(require_teacher)):
+    """Delete a lesson"""
+    lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Notify students
+    for student_id in lesson.get("student_ids", []):
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": student_id,
+            "title": "Ders İptal Edildi",
+            "message": f"'{lesson['title']}' ({lesson['date']}) dersiniz iptal edildi.",
+            "type": "warning",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    await db.lessons.delete_one({"id": lesson_id})
+    return {"message": "Lesson deleted"}
+
+# ==================== RESCHEDULE REQUESTS ====================
+
+@api_router.post("/reschedule-request")
+async def create_reschedule_request(request: RescheduleRequest, current_user: dict = Depends(require_approved_student)):
+    """Student requests to reschedule a lesson"""
+    lesson = await db.lessons.find_one({"id": request.lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    if current_user["role"] == "student" and current_user["id"] not in lesson.get("student_ids", []):
+        raise HTTPException(status_code=403, detail="Not your lesson")
+    
+    request_doc = {
+        "id": str(uuid.uuid4()),
+        "lesson_id": request.lesson_id,
+        "student_id": current_user["id"],
+        "student_name": current_user["name"],
+        "original_date": lesson["date"],
+        "original_time": f"{lesson['start_time']} - {lesson['end_time']}",
+        "requested_date": request.requested_date,
+        "requested_start_time": request.requested_start_time,
+        "requested_end_time": request.requested_end_time,
+        "reason": request.reason,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.reschedule_requests.insert_one(request_doc)
+    
+    # Notify teacher
+    teacher = await db.users.find_one({"role": "teacher"})
+    if teacher:
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": teacher["id"],
+            "title": "Ders Değişiklik Talebi",
+            "message": f"{current_user['name']} '{lesson['title']}' dersi için tarih değişikliği talep etti.",
+            "type": "reschedule",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    return {"message": "Reschedule request submitted", "request_id": request_doc["id"]}
+
+@api_router.get("/reschedule-requests")
+async def get_reschedule_requests(current_user: dict = Depends(require_approved_student)):
+    """Get reschedule requests"""
+    if current_user["role"] == "teacher":
+        requests = await db.reschedule_requests.find({}, {"_id": 0}).to_list(1000)
+    else:
+        requests = await db.reschedule_requests.find(
+            {"student_id": current_user["id"]}, 
+            {"_id": 0}
+        ).to_list(1000)
+    return requests
+
+@api_router.post("/reschedule-requests/{request_id}/respond")
+async def respond_reschedule_request(request_id: str, response: RescheduleResponse, current_user: dict = Depends(require_teacher)):
+    """Teacher approves or rejects reschedule request"""
+    req = await db.reschedule_requests.find_one({"id": request_id})
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    status = "approved" if response.approved else "rejected"
+    await db.reschedule_requests.update_one(
+        {"id": request_id},
+        {"$set": {"status": status, "response_message": response.message}}
+    )
+    
+    # If approved, update the lesson
+    if response.approved:
+        await db.lessons.update_one(
+            {"id": req["lesson_id"]},
+            {"$set": {
+                "date": req["requested_date"],
+                "start_time": req["requested_start_time"],
+                "end_time": req["requested_end_time"]
+            }}
+        )
+    
+    # Notify student
+    notif = {
+        "id": str(uuid.uuid4()),
+        "user_id": req["student_id"],
+        "title": "Talep Yanıtlandı",
+        "message": f"Ders değişiklik talebiniz {'onaylandı' if response.approved else 'reddedildi'}. {response.message or ''}",
+        "type": "success" if response.approved else "warning",
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notif)
+    
+    return {"message": "Response sent"}
+
+# ==================== MATERIALS ====================
+
+@api_router.post("/materials")
+async def create_material(material: MaterialCreate, current_user: dict = Depends(require_teacher)):
+    """Create a new material/resource"""
+    material_doc = {
+        "id": str(uuid.uuid4()),
+        "title": material.title,
+        "description": material.description,
+        "link": material.link,
+        "file_type": material.file_type,
+        "visible_to": material.visible_to,  # empty = all students
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.materials.insert_one(material_doc)
+    
+    # Notify students
+    if material.visible_to:
+        student_ids = material.visible_to
+    else:
+        students = await db.users.find({"role": "student", "approved": True}, {"id": 1}).to_list(1000)
+        student_ids = [s["id"] for s in students]
+    
+    for student_id in student_ids:
+        notif = {
+            "id": str(uuid.uuid4()),
+            "user_id": student_id,
+            "title": "Yeni Materyal",
+            "message": f"'{material.title}' materyali eklendi.",
+            "type": "info",
+            "read": False,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.notifications.insert_one(notif)
+    
+    return {"message": "Material created", "material_id": material_doc["id"]}
+
+@api_router.get("/materials")
+async def get_materials(current_user: dict = Depends(require_approved_student)):
+    """Get materials"""
+    if current_user["role"] == "teacher":
+        materials = await db.materials.find({}, {"_id": 0}).to_list(1000)
+    else:
+        # Students see materials visible to them or all
+        materials = await db.materials.find(
+            {"$or": [
+                {"visible_to": {"$size": 0}},
+                {"visible_to": current_user["id"]}
+            ]},
+            {"_id": 0}
+        ).to_list(1000)
+    return materials
+
+@api_router.delete("/materials/{material_id}")
+async def delete_material(material_id: str, current_user: dict = Depends(require_teacher)):
+    """Delete a material"""
+    result = await db.materials.delete_one({"id": material_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Material not found")
+    return {"message": "Material deleted"}
+
+# ==================== NOTIFICATIONS ====================
+
+@api_router.get("/notifications")
+async def get_notifications(current_user: dict = Depends(get_current_user)):
+    """Get user's notifications"""
+    notifications = await db.notifications.find(
+        {"user_id": current_user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return notifications
+
+@api_router.get("/notifications/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    """Get unread notification count"""
+    count = await db.notifications.count_documents({"user_id": current_user["id"], "read": False})
+    return {"count": count}
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark notification as read"""
+    await db.notifications.update_one(
+        {"id": notification_id, "user_id": current_user["id"]},
+        {"$set": {"read": True}}
+    )
+    return {"message": "Marked as read"}
+
+@api_router.put("/notifications/read-all")
+async def mark_all_read(current_user: dict = Depends(get_current_user)):
+    """Mark all notifications as read"""
+    await db.notifications.update_many(
+        {"user_id": current_user["id"]},
+        {"$set": {"read": True}}
+    )
+    return {"message": "All marked as read"}
+
+# ==================== INIT TEACHER ====================
+
+@api_router.post("/init-teacher")
+async def init_teacher():
+    """Initialize teacher account (only works if no teacher exists)"""
+    existing = await db.users.find_one({"role": "teacher"})
+    if existing:
+        raise HTTPException(status_code=400, detail="Teacher already exists")
+    
+    teacher_doc = {
+        "id": str(uuid.uuid4()),
+        "email": "teacher@bulgarcakolayca.com",
+        "password": hash_password("teacher123"),
+        "name": "Fatma Uslu Özşeker",
+        "role": "teacher",
+        "approved": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(teacher_doc)
+    return {"message": "Teacher account created", "email": "teacher@bulgarcakolayca.com", "password": "teacher123"}
 
 # Include the router in the main app
 app.include_router(api_router)

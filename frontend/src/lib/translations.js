@@ -9,6 +9,7 @@ export const translations = {
       pricing: "Fiyatlar",
       levelTest: "Seviye Testi",
       contact: "İletişim",
+      panel: "Öğrenci Girişi",
     },
     // Hero Section
     hero: {
@@ -185,6 +186,7 @@ export const translations = {
       pricing: "Pricing",
       levelTest: "Level Test",
       contact: "Contact",
+      panel: "Student Login",
     },
     // Hero Section
     hero: {
@@ -339,6 +341,7 @@ export const translations = {
       pricing: "Цени",
       levelTest: "Тест за ниво",
       contact: "Контакт",
+      panel: "Вход за ученици",
     },
     // Hero Section
     hero: {

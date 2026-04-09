@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@/App.css";
 import axios from "axios";
 import { translations } from "@/lib/translations";
@@ -30,9 +31,15 @@ import {
   Mail,
   Phone,
   MapPin,
-  ChevronRight
+  ChevronRight,
+  LogIn
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -114,8 +121,8 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Language Switcher */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Language Switcher + Panel Button */}
+          <div className="hidden md:flex items-center gap-3">
             {["tr", "en", "bg"].map((l) => (
               <button
                 key={l}
@@ -130,6 +137,14 @@ const Navigation = () => {
                 {l.toUpperCase()}
               </button>
             ))}
+            <a 
+              href="/panel/login" 
+              className="ml-2 flex items-center gap-2 px-4 py-2 bg-[#C41E3A] text-white rounded-full text-sm font-medium hover:bg-[#A01830] transition-colors"
+              data-testid="panel-login-btn"
+            >
+              <LogIn className="h-4 w-4" />
+              {t("nav.panel") || "Öğrenci Girişi"}
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -1731,27 +1746,46 @@ const Footer = () => {
   );
 };
 
+// Landing Page Component
+const LandingPage = () => {
+  return (
+    <>
+      <Navigation />
+      <main>
+        <HeroSection />
+        <WhoIsThisForSection />
+        <AboutSection />
+        <CoursesSection />
+        <CurriculumSection />
+        <FlashcardsSection />
+        <WhyUsSection />
+        <LevelTestSection />
+        <ContactSection />
+      </main>
+      <Footer />
+    </>
+  );
+};
+
 // Main App
 function App() {
   return (
-    <LanguageProvider>
-      <div className="App">
-        <Toaster position="top-center" richColors />
-        <Navigation />
-        <main>
-          <HeroSection />
-          <WhoIsThisForSection />
-          <AboutSection />
-          <CoursesSection />
-          <CurriculumSection />
-          <FlashcardsSection />
-          <WhyUsSection />
-          <LevelTestSection />
-          <ContactSection />
-        </main>
-        <Footer />
-      </div>
-    </LanguageProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <LanguageProvider>
+          <div className="App">
+            <Toaster position="top-center" richColors />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/panel/login" element={<Login />} />
+              <Route path="/panel/register" element={<Register />} />
+              <Route path="/panel/teacher" element={<TeacherDashboard />} />
+              <Route path="/panel/student" element={<StudentDashboard />} />
+            </Routes>
+          </div>
+        </LanguageProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
